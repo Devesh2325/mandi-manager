@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
 import { fmtQty } from "@/lib/format";
+import { Receipt } from "lucide-react";
 
 export const Route = createFileRoute("/app/stock")({
   component: StockPage,
