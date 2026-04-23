@@ -5,16 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Mandi ERP — "Ledger Terminal" design system
- * Dense, Excel-like, keyboard-first. Inspired by Tally/Busy + bazaar paper-bills.
- * Palette: deep ink-blue UI, paper-cream content, mandi-saffron primary, ledger-green credit, vermilion debit.
+ * Mandi ERP — "Soft Neumorphic Sky" design system
+ * Pale-blue + white, rounded cards, soft pebble shadows, friendly modern SaaS.
+ * Plus Jakarta Sans body, JetBrains Mono for tabular numerals.
  */
 
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
 @theme inline {
-  --radius-sm: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
   --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-lg: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 12px);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -44,6 +46,12 @@
   --color-grid-row-alt: var(--grid-row-alt);
   --color-paper: var(--paper);
 
+  --color-brand-light: var(--brand-light);
+  --color-success: var(--credit);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -59,117 +67,134 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono:
     "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --shadow-pebble:
+    0 24px 48px -12px color-mix(in oklab, var(--primary) 22%, transparent),
+    0 4px 12px -4px rgba(0, 0, 0, 0.04),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9);
+  --shadow-pebble-sm:
+    0 12px 24px -8px color-mix(in oklab, var(--primary) 18%, transparent),
+    inset 0 2px 2px rgba(255, 255, 255, 0.9);
 }
 
 :root {
-  --radius: 0.25rem;
+  --radius: 0.75rem;
 
-  /* Paper cream background, ink-black foreground */
-  --background: oklch(0.985 0.012 95);
-  --foreground: oklch(0.18 0.02 250);
-  --paper: oklch(0.99 0.01 95);
+  /* Pale sky canvas, deep slate ink */
+  --background: oklch(0.97 0.012 240);
+  --foreground: oklch(0.27 0.04 255);
+  --paper: oklch(1 0 0);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 250);
+  --card-foreground: oklch(0.27 0.04 255);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 250);
+  --popover-foreground: oklch(0.27 0.04 255);
 
-  /* Mandi saffron primary */
-  --primary: oklch(0.62 0.17 55);
-  --primary-foreground: oklch(0.99 0.01 95);
+  /* Sky-blue brand */
+  --primary: oklch(0.66 0.13 255);
+  --primary-foreground: oklch(0.99 0.005 240);
+  --brand-light: oklch(0.95 0.025 250);
 
-  --secondary: oklch(0.94 0.02 90);
-  --secondary-foreground: oklch(0.22 0.03 250);
+  --secondary: oklch(0.95 0.018 240);
+  --secondary-foreground: oklch(0.30 0.04 255);
 
-  --muted: oklch(0.95 0.012 90);
-  --muted-foreground: oklch(0.45 0.02 250);
+  --muted: oklch(0.96 0.012 240);
+  --muted-foreground: oklch(0.55 0.03 250);
 
-  --accent: oklch(0.92 0.04 75);
-  --accent-foreground: oklch(0.22 0.03 250);
+  --accent: oklch(0.94 0.03 250);
+  --accent-foreground: oklch(0.30 0.04 255);
 
-  /* Vermilion debit, leaf-green credit */
-  --destructive: oklch(0.55 0.21 28);
-  --destructive-foreground: oklch(0.99 0.01 95);
-  --debit: oklch(0.52 0.20 28);
-  --credit: oklch(0.50 0.14 150);
+  /* Soft warning + leaf credit */
+  --destructive: oklch(0.62 0.18 28);
+  --destructive-foreground: oklch(0.99 0.005 240);
+  --debit: oklch(0.62 0.18 28);
+  --credit: oklch(0.62 0.13 155);
+  --warning: oklch(0.70 0.14 55);
+  --success-bg: oklch(0.96 0.04 155);
+  --warning-bg: oklch(0.96 0.05 70);
 
-  --border: oklch(0.85 0.02 80);
-  --input: oklch(0.88 0.018 80);
-  --ring: oklch(0.62 0.17 55);
+  --border: oklch(0.92 0.015 245);
+  --input: oklch(0.93 0.015 245);
+  --ring: oklch(0.66 0.13 255);
 
-  /* Excel grid */
-  --grid-line: oklch(0.86 0.015 80);
-  --grid-header: oklch(0.92 0.025 80);
-  --grid-row-alt: oklch(0.97 0.012 90);
+  /* Grids stay light & airy */
+  --grid-line: oklch(0.93 0.015 245);
+  --grid-header: oklch(0.96 0.018 245);
+  --grid-row-alt: oklch(0.985 0.008 245);
 
-  --chart-1: oklch(0.62 0.17 55);
-  --chart-2: oklch(0.50 0.14 150);
-  --chart-3: oklch(0.52 0.20 28);
-  --chart-4: oklch(0.55 0.15 250);
-  --chart-5: oklch(0.65 0.16 300);
+  --chart-1: oklch(0.66 0.13 255);
+  --chart-2: oklch(0.62 0.13 155);
+  --chart-3: oklch(0.70 0.14 55);
+  --chart-4: oklch(0.65 0.15 290);
+  --chart-5: oklch(0.62 0.18 28);
 
-  /* Deep ink-blue sidebar */
-  --sidebar: oklch(0.22 0.04 255);
-  --sidebar-foreground: oklch(0.92 0.01 90);
-  --sidebar-primary: oklch(0.62 0.17 55);
-  --sidebar-primary-foreground: oklch(0.99 0.01 95);
-  --sidebar-accent: oklch(0.28 0.05 255);
-  --sidebar-accent-foreground: oklch(0.99 0.01 90);
-  --sidebar-border: oklch(0.32 0.04 255);
-  --sidebar-ring: oklch(0.62 0.17 55);
+  /* Sidebar = white/pale, not dark */
+  --sidebar: oklch(0.97 0.012 240);
+  --sidebar-foreground: oklch(0.30 0.04 255);
+  --sidebar-primary: oklch(0.66 0.13 255);
+  --sidebar-primary-foreground: oklch(0.99 0.005 240);
+  --sidebar-accent: oklch(0.94 0.025 250);
+  --sidebar-accent-foreground: oklch(0.30 0.04 255);
+  --sidebar-border: oklch(0.92 0.015 245);
+  --sidebar-ring: oklch(0.66 0.13 255);
 }
 
 .dark {
-  --background: oklch(0.16 0.02 250);
-  --foreground: oklch(0.95 0.01 90);
-  --paper: oklch(0.20 0.02 250);
+  --background: oklch(0.20 0.025 255);
+  --foreground: oklch(0.95 0.01 240);
+  --paper: oklch(0.24 0.03 255);
 
-  --card: oklch(0.20 0.025 250);
-  --card-foreground: oklch(0.95 0.01 90);
-  --popover: oklch(0.20 0.025 250);
-  --popover-foreground: oklch(0.95 0.01 90);
+  --card: oklch(0.24 0.03 255);
+  --card-foreground: oklch(0.95 0.01 240);
+  --popover: oklch(0.24 0.03 255);
+  --popover-foreground: oklch(0.95 0.01 240);
 
-  --primary: oklch(0.72 0.17 55);
-  --primary-foreground: oklch(0.18 0.02 250);
+  --primary: oklch(0.72 0.13 255);
+  --primary-foreground: oklch(0.20 0.025 255);
+  --brand-light: oklch(0.30 0.05 255);
 
-  --secondary: oklch(0.26 0.03 250);
-  --secondary-foreground: oklch(0.95 0.01 90);
+  --secondary: oklch(0.28 0.03 255);
+  --secondary-foreground: oklch(0.95 0.01 240);
 
-  --muted: oklch(0.26 0.03 250);
-  --muted-foreground: oklch(0.70 0.02 90);
+  --muted: oklch(0.28 0.03 255);
+  --muted-foreground: oklch(0.72 0.02 240);
 
-  --accent: oklch(0.30 0.05 75);
-  --accent-foreground: oklch(0.95 0.01 90);
+  --accent: oklch(0.32 0.05 255);
+  --accent-foreground: oklch(0.95 0.01 240);
 
-  --destructive: oklch(0.65 0.21 28);
-  --destructive-foreground: oklch(0.99 0.01 95);
-  --debit: oklch(0.70 0.20 28);
-  --credit: oklch(0.72 0.16 150);
+  --destructive: oklch(0.68 0.18 28);
+  --destructive-foreground: oklch(0.99 0.005 240);
+  --debit: oklch(0.72 0.18 28);
+  --credit: oklch(0.72 0.13 155);
+  --warning: oklch(0.78 0.14 55);
+  --success-bg: oklch(0.30 0.05 155);
+  --warning-bg: oklch(0.30 0.05 70);
 
-  --border: oklch(0.30 0.03 250);
-  --input: oklch(0.30 0.03 250);
-  --ring: oklch(0.72 0.17 55);
+  --border: oklch(0.32 0.03 255);
+  --input: oklch(0.32 0.03 255);
+  --ring: oklch(0.72 0.13 255);
 
-  --grid-line: oklch(0.30 0.03 250);
-  --grid-header: oklch(0.26 0.03 250);
-  --grid-row-alt: oklch(0.22 0.025 250);
+  --grid-line: oklch(0.32 0.03 255);
+  --grid-header: oklch(0.28 0.03 255);
+  --grid-row-alt: oklch(0.26 0.03 255);
 
-  --chart-1: oklch(0.72 0.17 55);
-  --chart-2: oklch(0.72 0.16 150);
-  --chart-3: oklch(0.70 0.20 28);
-  --chart-4: oklch(0.65 0.16 250);
-  --chart-5: oklch(0.70 0.18 300);
+  --chart-1: oklch(0.72 0.13 255);
+  --chart-2: oklch(0.72 0.13 155);
+  --chart-3: oklch(0.78 0.14 55);
+  --chart-4: oklch(0.70 0.15 290);
+  --chart-5: oklch(0.68 0.18 28);
 
-  --sidebar: oklch(0.18 0.03 255);
-  --sidebar-foreground: oklch(0.92 0.01 90);
-  --sidebar-primary: oklch(0.72 0.17 55);
-  --sidebar-primary-foreground: oklch(0.18 0.02 250);
-  --sidebar-accent: oklch(0.24 0.04 255);
-  --sidebar-accent-foreground: oklch(0.95 0.01 90);
-  --sidebar-border: oklch(0.28 0.04 255);
-  --sidebar-ring: oklch(0.72 0.17 55);
+  --sidebar: oklch(0.22 0.03 255);
+  --sidebar-foreground: oklch(0.92 0.01 240);
+  --sidebar-primary: oklch(0.72 0.13 255);
+  --sidebar-primary-foreground: oklch(0.20 0.025 255);
+  --sidebar-accent: oklch(0.28 0.04 255);
+  --sidebar-accent-foreground: oklch(0.95 0.01 240);
+  --sidebar-border: oklch(0.30 0.04 255);
+  --sidebar-ring: oklch(0.72 0.13 255);
 }
 
 @layer base {
@@ -177,34 +202,51 @@
     border-color: var(--color-border);
   }
 
+  html, body {
+    font-family: var(--font-sans);
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-feature-settings: "tnum" 1, "cv02" 1;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Tabular numerals everywhere by default — critical for ledger UIs */
   input[type="number"],
   .tabular {
     font-variant-numeric: tabular-nums;
   }
 }
 
-/* ================== Excel-grid utilities ================== */
+/* ================== Pebble cards & soft surfaces ================== */
 @layer components {
+  .pebble {
+    background: var(--card);
+    border: 1px solid color-mix(in oklab, var(--primary) 8%, white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-pebble);
+  }
+  .pebble-sm {
+    background: var(--card);
+    border: 1px solid color-mix(in oklab, var(--primary) 8%, white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-pebble-sm);
+  }
+
+  /* Excel grid — kept airy for the new theme */
   .grid-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 12px;
+    font-size: 13px;
     font-variant-numeric: tabular-nums;
   }
   .grid-table th,
   .grid-table td {
-    border-right: 1px solid var(--grid-line);
     border-bottom: 1px solid var(--grid-line);
-    padding: 4px 6px;
-    line-height: 1.2;
+    padding: 8px 10px;
+    line-height: 1.3;
     vertical-align: middle;
   }
   .grid-table thead th {
@@ -214,13 +256,13 @@
     position: sticky;
     top: 0;
     z-index: 2;
-    border-top: 1px solid var(--grid-line);
-  }
-  .grid-table tbody tr:nth-child(even) td {
-    background: var(--grid-row-alt);
+    color: var(--muted-foreground);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
   .grid-table tbody tr:hover td {
-    background: color-mix(in oklab, var(--primary) 10%, transparent);
+    background: color-mix(in oklab, var(--primary) 6%, transparent);
   }
   .grid-table .num {
     text-align: right;
@@ -230,15 +272,15 @@
     width: 100%;
     background: transparent;
     border: 1px solid transparent;
-    padding: 2px 4px;
-    font-size: 12px;
+    padding: 4px 6px;
+    font-size: 13px;
     font-variant-numeric: tabular-nums;
     outline: none;
-    border-radius: 2px;
+    border-radius: 6px;
   }
   .grid-input:focus {
     background: var(--card);
     border-color: var(--ring);
-    box-shadow: 0 0 0 1px var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent);
   }
 }
