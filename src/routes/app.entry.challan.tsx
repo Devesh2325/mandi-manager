@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { db, type AppliedExpense, type Challan, type QualityRow, type SaleLine, type StockEntry, type Teep, type LedgerEntry } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
@@ -231,9 +232,15 @@ function ChallanEntryPage() {
       if (teeps.length) await db.teeps.bulkAdd(teeps);
       if (ledger.length) await db.ledger.bulkAdd(ledger);
 
+      toast.success(`Challan ${challan.challanNo} saved`, {
+        description: `${rows.length} quality row(s), ${teeps.length} teep(s), ${ledger.length} ledger posting(s).`,
+      });
       navigate({ to: "/app/teep" });
     } catch (e) {
-      setError(String(e));
+      console.error("Challan save failed:", e);
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(msg);
+      toast.error("Save failed", { description: msg });
     } finally {
       setSaving(false);
     }

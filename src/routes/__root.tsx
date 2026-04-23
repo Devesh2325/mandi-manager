@@ -1,5 +1,6 @@
 import { Outlet, createRootRoute, HeadContent, Scripts, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider, useAppSession } from "@/lib/session-context";
 import appCss from "../styles.css?url";
 
@@ -59,6 +60,7 @@ function RootComponent() {
     <SessionProvider>
       <RouteGuard />
       <Outlet />
+      <Toaster richColors position="top-right" />
     </SessionProvider>
   );
 }
