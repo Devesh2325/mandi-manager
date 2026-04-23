@@ -262,12 +262,19 @@ function ChallanEntryPage() {
         title="Main Challan Entry"
         right={
           <div className="flex items-center gap-2">
+            {!canSave && (
+              <span className="hidden md:inline-flex items-center gap-1 rounded bg-amber-500/15 px-2 py-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                <AlertCircle className="h-3 w-3" />
+                {!farmerId ? "Pick farmer" : !itemId ? "Pick item" : "Enter qty in row"}
+              </span>
+            )}
             <button onClick={() => navigate({ to: "/app" })} className="rounded border border-input px-3 py-1.5 text-xs hover:bg-muted">
               <X className="mr-1 inline h-3 w-3" /> Cancel
             </button>
             <button
-              onClick={save}
-              disabled={!canSave || saving}
+              onClick={() => { if (!canSave) { toast.warning("Cannot save", { description: !farmerId ? "Please select a farmer." : !itemId ? "Please select an item." : "Enter quantity in at least one quality row." }); return; } save(); }}
+              disabled={saving}
+              title={!canSave ? "Fill farmer, item and at least one row qty" : "Save challan"}
               className="inline-flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               <Save className="h-3 w-3" /> {saving ? "Saving…" : "Save (Ctrl+S)"}
