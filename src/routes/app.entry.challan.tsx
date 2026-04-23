@@ -33,6 +33,13 @@ function ChallanEntryPage() {
   const buyers = parties.filter((p) => p.type === "buyer");
   const agents = parties.filter((p) => p.type === "agent");
 
+  // Distinct goods types from items
+  const goodsTypes = useMemo(() => {
+    const set = new Set<string>(items.map((i) => i.goodsType).filter(Boolean));
+    ["Vegetable", "Fruit", "Grain"].forEach((g) => set.add(g));
+    return Array.from(set);
+  }, [items]);
+
   const [challanNo, setChallanNo] = useState("");
   const [date, setDate] = useState(todayISO());
   const [goodsType, setGoodsType] = useState("Vegetable");
