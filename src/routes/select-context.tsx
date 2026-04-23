@@ -15,7 +15,8 @@ function SelectContextPage() {
   const companies = useLiveQuery(() => db.companies.toArray(), []) ?? [];
   const [companyId, setCompanyId] = useState<number | null>(null);
   const years = useLiveQuery(
-    () => (companyId ? db.financialYears.where("companyId").equals(companyId).toArray() : Promise.resolve([])),
+    async () =>
+      companyId ? await db.financialYears.where("companyId").equals(companyId).toArray() : [],
     [companyId],
   ) ?? [];
   const [yearId, setYearId] = useState<number | null>(null);
