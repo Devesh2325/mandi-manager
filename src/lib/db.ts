@@ -1,0 +1,360 @@
+import Dexie, { type Table } from "dexie";
+
+// ============ Types ============
+export interface Company {
+  id?: number;
+  name: string;
+  shortCode: string;
+  address?: string;
+  gstin?: string;
+  createdAt: number;
+}
+
+export interface FinancialYear {
+  id?: number;
+  companyId: number;
+  label: string; // e.g. "2024-25"
+  startDate: string; // ISO
+  endDate: string; // ISO
+}
+
+export interface User {
+  id?: number;
+  username: string;
+  password: string; // mock only
+  name: string;
+  role: "admin" | "operator" | "viewer";
+}
+
+// ===== Masters =====
+export type PartyType = "farmer" | "buyer" | "agent" | "expense" | "other";
+
+export interface Party {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  type: PartyType;
+  name: string;
+  shortCode: string; // e.g. RAM01
+  mobile?: string;
+  village?: string;
+  city?: string;
+  openingBalance: number;
+  openingType: "Dr" | "Cr";
+  creditLimit?: number;
+  createdAt: number;
+}
+
+export interface Item {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  name: string;
+  shortCode: string;
+  goodsType: string; // e.g. Fruit / Vegetable
+  unit: string; // Kg / Quintal / Crate
+}
+
+export interface Quality {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  name: string; // A / B / Super
+}
+
+export interface Size {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  name: string; // Small / Medium / Large / 20Layer / 50Layer
+}
+
+export interface Packing {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  name: string; // Crate / Bag / Box
+  isReturnable: boolean;
+}
+
+export type ExpenseOperator = "fix" | "percent" | "perUnit";
+export type ExpenseSide = "debit" | "credit";
+export type ExpenseApply = "buyer" | "grower" | "both";
+
+export interface ExpenseAccount {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  name: string; // APMC / Vapsi / Hamali / Dalali
+  operator: ExpenseOperator;
+  value: number; // amount or %
+  side: ExpenseSide;
+  applyOn: ExpenseApply;
+  isPreset: boolean;
+}
+
+export interface Store {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  name: string;
+  address?: string;
+}
+
+// ===== Entry: Challan / Arrival / Sale =====
+export interface SaleLine {
+  buyerId: number;
+  qty: number;
+  rate: number;
+  amount: number;
+}
+
+export interface QualityRow {
+  id: string;
+  qualityId?: number;
+  lotNo: string;
+  sizeId?: number;
+  qty: number;
+  packingId?: number;
+  // sub-packing matrix qty + rate per size key
+  matrix?: Record<string, { qty: number; rate: number }>;
+  // inline buyers
+  sales: SaleLine[];
+}
+
+export interface AppliedExpense {
+  expenseId?: number;
+  name: string;
+  amount: number;
+  side: ExpenseSide;
+  applyOn: ExpenseApply;
+  source: "preset" | "manual";
+}
+
+export interface Challan {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  challanNo: string;
+  date: string; // ISO date
+  goodsType: string;
+  farmerId: number;
+  agentId?: number;
+  truckNo?: string;
+  itemId: number;
+  totalQty: number;
+  qualities: QualityRow[];
+  expenses: AppliedExpense[];
+  notes?: string;
+  createdAt: number;
+}
+
+// ===== Stock & Teep & Ledger =====
+export interface StockEntry {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  challanId: number;
+  itemId: number;
+  qualityId?: number;
+  storeId?: number;
+  qtyIn: number;
+  qtyOut: number;
+  date: string;
+}
+
+export interface Teep {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  teepNo: string;
+  date: string;
+  challanId: number;
+  buyerId: number;
+  itemId: number;
+  qualityId?: number;
+  qty: number;
+  rate: number;
+  gross: number;
+  expenses: AppliedExpense[];
+  net: number;
+}
+
+export interface LedgerEntry {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  date: string;
+  partyId: number;
+  refType: "challan" | "teep" | "voucher" | "opening";
+  refId: number;
+  narration: string;
+  debit: number;
+  credit: number;
+}
+
+export type VoucherType = "payment" | "receipt" | "journal";
+export interface Voucher {
+  id?: number;
+  companyId: number;
+  yearId: number;
+  type: VoucherType;
+  voucherNo: string;
+  date: string;
+  partyId: number;
+  amount: number;
+  narration?: string;
+}
+
+// ============ DB ============
+class MandiDB extends Dexie {
+  companies!: Table<Company, number>;
+  financialYears!: Table<FinancialYear, number>;
+  users!: Table<User, number>;
+
+  parties!: Table<Party, number>;
+  items!: Table<Item, number>;
+  qualities!: Table<Quality, number>;
+  sizes!: Table<Size, number>;
+  packings!: Table<Packing, number>;
+  expenseAccounts!: Table<ExpenseAccount, number>;
+  stores!: Table<Store, number>;
+
+  challans!: Table<Challan, number>;
+  stockEntries!: Table<StockEntry, number>;
+  teeps!: Table<Teep, number>;
+  ledger!: Table<LedgerEntry, number>;
+  vouchers!: Table<Voucher, number>;
+
+  constructor() {
+    super("MandiERP");
+    this.version(1).stores({
+      companies: "++id, shortCode, name",
+      financialYears: "++id, companyId, label",
+      users: "++id, username",
+
+      parties: "++id, [companyId+yearId], [companyId+yearId+type], shortCode, name",
+      items: "++id, [companyId+yearId], shortCode, name",
+      qualities: "++id, [companyId+yearId], name",
+      sizes: "++id, [companyId+yearId], name",
+      packings: "++id, [companyId+yearId], name",
+      expenseAccounts: "++id, [companyId+yearId], name",
+      stores: "++id, [companyId+yearId], name",
+
+      challans: "++id, [companyId+yearId], challanNo, date, farmerId, itemId",
+      stockEntries: "++id, [companyId+yearId], challanId, itemId, date",
+      teeps: "++id, [companyId+yearId], teepNo, date, buyerId, challanId",
+      ledger: "++id, [companyId+yearId], partyId, date, refType",
+      vouchers: "++id, [companyId+yearId], voucherNo, date, partyId, type",
+    });
+  }
+}
+
+export const db = new MandiDB();
+
+// ============ Seed ============
+export async function seedIfEmpty() {
+  const userCount = await db.users.count();
+  if (userCount === 0) {
+    await db.users.bulkAdd([
+      { username: "admin", password: "admin", name: "Administrator", role: "admin" },
+      { username: "munim", password: "munim", name: "Munim ji", role: "operator" },
+    ]);
+  }
+
+  const companyCount = await db.companies.count();
+  if (companyCount === 0) {
+    const cId = await db.companies.add({
+      name: "Shree Balaji Trading Co.",
+      shortCode: "SBT",
+      address: "Shop 12, Azadpur Mandi, Delhi",
+      gstin: "07ABCDE1234F1Z5",
+      createdAt: Date.now(),
+    });
+    const c2 = await db.companies.add({
+      name: "Mahalaxmi Fruits",
+      shortCode: "MLF",
+      address: "Gate 4, Azadpur Mandi",
+      createdAt: Date.now(),
+    });
+    const yId = await db.financialYears.add({
+      companyId: cId,
+      label: "2024-25",
+      startDate: "2024-04-01",
+      endDate: "2025-03-31",
+    });
+    await db.financialYears.add({
+      companyId: cId,
+      label: "2023-24",
+      startDate: "2023-04-01",
+      endDate: "2024-03-31",
+    });
+    await db.financialYears.add({
+      companyId: c2,
+      label: "2024-25",
+      startDate: "2024-04-01",
+      endDate: "2025-03-31",
+    });
+
+    // Seed masters for first company+year
+    await seedMasters(cId, yId);
+  }
+}
+
+export async function seedMasters(companyId: number, yearId: number) {
+  const has = await db.parties.where({ companyId, yearId }).count();
+  if (has > 0) return;
+
+  const now = Date.now();
+  await db.parties.bulkAdd([
+    { companyId, yearId, type: "farmer", name: "Ram Kumar", shortCode: "RAM01", mobile: "9876543210", village: "Sonipat", openingBalance: 0, openingType: "Cr", createdAt: now },
+    { companyId, yearId, type: "farmer", name: "Shyam Singh", shortCode: "SHY01", village: "Karnal", openingBalance: 5000, openingType: "Cr", createdAt: now },
+    { companyId, yearId, type: "buyer", name: "Gupta Traders", shortCode: "GUP01", city: "Delhi", openingBalance: 12000, openingType: "Dr", createdAt: now },
+    { companyId, yearId, type: "buyer", name: "Sharma & Sons", shortCode: "SHA01", city: "Ghaziabad", openingBalance: 0, openingType: "Dr", createdAt: now },
+    { companyId, yearId, type: "buyer", name: "Mahavir Vegetables", shortCode: "MAH01", city: "Noida", openingBalance: 8500, openingType: "Dr", createdAt: now },
+    { companyId, yearId, type: "agent", name: "Kishan Lal Agent", shortCode: "AGT01", openingBalance: 0, openingType: "Cr", createdAt: now },
+  ]);
+
+  await db.items.bulkAdd([
+    { companyId, yearId, name: "Apple", shortCode: "APL", goodsType: "Fruit", unit: "Kg" },
+    { companyId, yearId, name: "Tomato", shortCode: "TOM", goodsType: "Vegetable", unit: "Kg" },
+    { companyId, yearId, name: "Onion", shortCode: "ONI", goodsType: "Vegetable", unit: "Kg" },
+    { companyId, yearId, name: "Potato", shortCode: "POT", goodsType: "Vegetable", unit: "Kg" },
+    { companyId, yearId, name: "Mango", shortCode: "MAN", goodsType: "Fruit", unit: "Kg" },
+  ]);
+
+  await db.qualities.bulkAdd([
+    { companyId, yearId, name: "Super" },
+    { companyId, yearId, name: "A Grade" },
+    { companyId, yearId, name: "B Grade" },
+    { companyId, yearId, name: "C Grade" },
+  ]);
+
+  await db.sizes.bulkAdd([
+    { companyId, yearId, name: "Small" },
+    { companyId, yearId, name: "Medium" },
+    { companyId, yearId, name: "Large" },
+    { companyId, yearId, name: "20 Layer" },
+    { companyId, yearId, name: "50 Layer" },
+  ]);
+
+  await db.packings.bulkAdd([
+    { companyId, yearId, name: "Crate", isReturnable: true },
+    { companyId, yearId, name: "Bag", isReturnable: false },
+    { companyId, yearId, name: "Box", isReturnable: false },
+    { companyId, yearId, name: "Carton", isReturnable: false },
+  ]);
+
+  await db.expenseAccounts.bulkAdd([
+    { companyId, yearId, name: "APMC Cess", operator: "percent", value: 1, side: "debit", applyOn: "grower", isPreset: true },
+    { companyId, yearId, name: "Commission (Dalali)", operator: "percent", value: 6, side: "debit", applyOn: "grower", isPreset: true },
+    { companyId, yearId, name: "Hamali", operator: "perUnit", value: 2, side: "debit", applyOn: "grower", isPreset: true },
+    { companyId, yearId, name: "Vapsi (Returns)", operator: "fix", value: 0, side: "debit", applyOn: "buyer", isPreset: true },
+    { companyId, yearId, name: "Tulai (Weighing)", operator: "perUnit", value: 1, side: "debit", applyOn: "grower", isPreset: true },
+  ]);
+
+  await db.stores.bulkAdd([
+    { companyId, yearId, name: "Main Store" },
+    { companyId, yearId, name: "Cold Storage" },
+  ]);
+}
