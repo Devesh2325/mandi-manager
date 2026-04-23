@@ -60,6 +60,7 @@ export interface Quality {
   companyId: number;
   yearId: number;
   name: string; // A / B / Super
+  itemId?: number; // optional: bind this quality to a specific item
 }
 
 export interface Size {
