@@ -1,6 +1,7 @@
 import { Outlet, createRootRoute, HeadContent, Scripts, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { RouteLoader } from "@/components/RouteLoader";
 import { SessionProvider, useAppSession } from "@/lib/session-context";
 import appCss from "../styles.css?url";
 
