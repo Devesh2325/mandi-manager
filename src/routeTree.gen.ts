@@ -15,9 +15,11 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppMastersRouteImport } from './routes/app.masters'
+import { Route as AppEntryRouteImport } from './routes/app.entry'
 import { Route as AppMastersPartiesRouteImport } from './routes/app.masters.parties'
 import { Route as AppMastersItemsRouteImport } from './routes/app.masters.items'
 import { Route as AppMastersExpensesRouteImport } from './routes/app.masters.expenses'
+import { Route as AppEntryChallanRouteImport } from './routes/app.entry.challan'
 
 const SelectContextRoute = SelectContextRouteImport.update({
   id: '/select-context',
@@ -49,6 +51,11 @@ const AppMastersRoute = AppMastersRouteImport.update({
   path: '/masters',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEntryRoute = AppEntryRouteImport.update({
+  id: '/entry',
+  path: '/entry',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMastersPartiesRoute = AppMastersPartiesRouteImport.update({
   id: '/parties',
   path: '/parties',
@@ -64,14 +71,21 @@ const AppMastersExpensesRoute = AppMastersExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => AppMastersRoute,
 } as any)
+const AppEntryChallanRoute = AppEntryChallanRouteImport.update({
+  id: '/challan',
+  path: '/challan',
+  getParentRoute: () => AppEntryRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/app/entry': typeof AppEntryRouteWithChildren
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app/': typeof AppIndexRoute
+  '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
@@ -80,8 +94,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/app/entry': typeof AppEntryRouteWithChildren
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app': typeof AppIndexRoute
+  '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
@@ -92,8 +108,10 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/app/entry': typeof AppEntryRouteWithChildren
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app/': typeof AppIndexRoute
+  '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
@@ -105,8 +123,10 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/select-context'
+    | '/app/entry'
     | '/app/masters'
     | '/app/'
+    | '/app/entry/challan'
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
@@ -115,8 +135,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/select-context'
+    | '/app/entry'
     | '/app/masters'
     | '/app'
+    | '/app/entry/challan'
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
@@ -126,8 +148,10 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/select-context'
+    | '/app/entry'
     | '/app/masters'
     | '/app/'
+    | '/app/entry/challan'
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
@@ -184,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMastersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/entry': {
+      id: '/app/entry'
+      path: '/entry'
+      fullPath: '/app/entry'
+      preLoaderRoute: typeof AppEntryRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/masters/parties': {
       id: '/app/masters/parties'
       path: '/parties'
@@ -205,8 +236,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMastersExpensesRouteImport
       parentRoute: typeof AppMastersRoute
     }
+    '/app/entry/challan': {
+      id: '/app/entry/challan'
+      path: '/challan'
+      fullPath: '/app/entry/challan'
+      preLoaderRoute: typeof AppEntryChallanRouteImport
+      parentRoute: typeof AppEntryRoute
+    }
   }
 }
+
+interface AppEntryRouteChildren {
+  AppEntryChallanRoute: typeof AppEntryChallanRoute
+}
+
+const AppEntryRouteChildren: AppEntryRouteChildren = {
+  AppEntryChallanRoute: AppEntryChallanRoute,
+}
+
+const AppEntryRouteWithChildren = AppEntryRoute._addFileChildren(
+  AppEntryRouteChildren,
+)
 
 interface AppMastersRouteChildren {
   AppMastersExpensesRoute: typeof AppMastersExpensesRoute
@@ -225,11 +275,13 @@ const AppMastersRouteWithChildren = AppMastersRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppEntryRoute: typeof AppEntryRouteWithChildren
   AppMastersRoute: typeof AppMastersRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppEntryRoute: AppEntryRouteWithChildren,
   AppMastersRoute: AppMastersRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
