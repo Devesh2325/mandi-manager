@@ -36,6 +36,7 @@ const groups: NavGroup[] = [
     label: "Entry",
     items: [
       { label: "Challan Entry", to: "/app/entry/challan", icon: Truck, shortcut: "F2" },
+      { label: "Stock Sale", to: "/app/stock/sale", icon: Receipt, shortcut: "F4" },
       { label: "Voucher (Pay/Recv)", to: "/app/entry/voucher", icon: Receipt, shortcut: "F3" },
     ],
   },
