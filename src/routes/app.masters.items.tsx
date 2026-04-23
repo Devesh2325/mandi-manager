@@ -19,18 +19,53 @@ function ItemsPage() {
   return (
     <div className="grid gap-4 p-4 lg:grid-cols-3">
       <ItemsTable items={items} companyId={companyId} yearId={yearId} />
-      <SimpleTable<Quality>
-        title="Qualities"
-        rows={qualities}
-        onAdd={(name) => db.qualities.add({ companyId, yearId, name })}
-        onDel={(id) => db.qualities.delete(id)}
-      />
+      <QualitiesTable qualities={qualities} items={items} companyId={companyId} yearId={yearId} />
       <SimpleTable<Size>
         title="Sizes"
         rows={sizes}
         onAdd={(name) => db.sizes.add({ companyId, yearId, name })}
         onDel={(id) => db.sizes.delete(id)}
       />
+    </div>
+  );
+}
+
+function QualitiesTable({ qualities, items, companyId, yearId }: { qualities: Quality[]; items: Item[]; companyId: number; yearId: number }) {
+  const [name, setName] = useState("");
+  const [itemId, setItemId] = useState<number | "">("");
+  const add = async () => {
+    if (!name.trim()) return;
+    await db.qualities.add({ companyId, yearId, name: name.trim(), itemId: itemId ? Number(itemId) : undefined });
+    setName("");
+  };
+  return (
+    <div className="rounded border border-border bg-card">
+      <div className="border-b border-border px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Qualities</div>
+      <div className="space-y-2 border-b border-border p-2">
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Quality name" className="w-full rounded border border-input bg-background px-2 py-1 text-xs" onKeyDown={(e) => e.key === "Enter" && add()} />
+        <div className="flex gap-2">
+          <select value={itemId} onChange={(e) => setItemId(Number(e.target.value) || "")} className="flex-1 rounded border border-input bg-background px-2 py-1 text-xs">
+            <option value="">— All items —</option>
+            {items.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+          </select>
+          <button onClick={add} className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground"><Plus className="h-3 w-3" /></button>
+        </div>
+      </div>
+      <table className="grid-table">
+        <thead><tr><th>Name</th><th>Item</th><th></th></tr></thead>
+        <tbody>
+          {qualities.map((q) => {
+            const it = items.find((x) => x.id === q.itemId);
+            return (
+              <tr key={q.id}>
+                <td className="font-medium">{q.name}</td>
+                <td className="text-muted-foreground">{it?.name ?? "All"}</td>
+                <td><button onClick={() => q.id && db.qualities.delete(q.id)} className="text-destructive"><Trash2 className="h-3 w-3" /></button></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

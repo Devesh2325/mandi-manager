@@ -33,6 +33,13 @@ function ChallanEntryPage() {
   const buyers = parties.filter((p) => p.type === "buyer");
   const agents = parties.filter((p) => p.type === "agent");
 
+  // Distinct goods types from items
+  const goodsTypes = useMemo(() => {
+    const set = new Set<string>(items.map((i) => i.goodsType).filter(Boolean));
+    ["Vegetable", "Fruit", "Grain"].forEach((g) => set.add(g));
+    return Array.from(set);
+  }, [items]);
+
   const [challanNo, setChallanNo] = useState("");
   const [date, setDate] = useState(todayISO());
   const [goodsType, setGoodsType] = useState("Vegetable");
@@ -292,8 +299,8 @@ function ChallanEntryPage() {
               <Field label="Challan #"><input value={challanNo} onChange={(e) => setChallanNo(e.target.value)} className="inp font-mono" /></Field>
               <Field label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
               <Field label="Goods Type">
-                <select value={goodsType} onChange={(e) => setGoodsType(e.target.value)} className="inp">
-                  <option>Vegetable</option><option>Fruit</option><option>Grain</option>
+                <select value={goodsType} onChange={(e) => { setGoodsType(e.target.value); setItemId(""); }} className="inp">
+                  {goodsTypes.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>
               </Field>
               <Field label="Farmer (Supplier) *">
@@ -316,7 +323,7 @@ function ChallanEntryPage() {
               <Field label="Item *">
                 <select value={itemId} onChange={(e) => setItemId(Number(e.target.value) || "")} className="inp">
                   <option value="">— Select item —</option>
-                  {items.map((i) => <option key={i.id} value={i.id}>{i.name} ({i.unit})</option>)}
+                  {items.filter((i) => i.goodsType === goodsType).map((i) => <option key={i.id} value={i.id}>{i.name} ({i.unit})</option>)}
                 </select>
               </Field>
               <Field label="Total Qty (declared)">
@@ -338,7 +345,7 @@ function ChallanEntryPage() {
                   <Field label="Quality" sm>
                     <select value={row.qualityId ?? ""} onChange={(e) => updateRow(row.id, { qualityId: Number(e.target.value) || undefined })} className="inp">
                       <option value="">—</option>
-                      {qualities.map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
+                      {qualities.filter((q) => !q.itemId || q.itemId === Number(itemId)).map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
                     </select>
                   </Field>
                   <Field label="Lot No" sm><input value={row.lotNo} onChange={(e) => updateRow(row.id, { lotNo: e.target.value })} className="inp font-mono" /></Field>
