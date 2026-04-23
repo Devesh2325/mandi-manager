@@ -304,60 +304,99 @@ export async function seedIfEmpty() {
 export async function seedMasters(companyId: number, yearId: number) {
   const now = Date.now();
 
-  // Seed each master table independently — only if that specific table is empty for this scope.
-  // This way, deleting all parties (or items, etc.) won't trigger a re-seed unless ALL of that
-  // type are gone. New companies/years get the full default set.
-  const partyCount = await db.parties.where({ companyId, yearId }).count();
-  if (partyCount === 0) {
-  await db.parties.bulkAdd([
-    { companyId, yearId, type: "farmer", name: "Ram Kumar", shortCode: "RAM01", mobile: "9876543210", village: "Sonipat", openingBalance: 0, openingType: "Cr", createdAt: now },
-    { companyId, yearId, type: "farmer", name: "Shyam Singh", shortCode: "SHY01", village: "Karnal", openingBalance: 5000, openingType: "Cr", createdAt: now },
-    { companyId, yearId, type: "buyer", name: "Gupta Traders", shortCode: "GUP01", city: "Delhi", openingBalance: 12000, openingType: "Dr", createdAt: now },
-    { companyId, yearId, type: "buyer", name: "Sharma & Sons", shortCode: "SHA01", city: "Ghaziabad", openingBalance: 0, openingType: "Dr", createdAt: now },
-    { companyId, yearId, type: "buyer", name: "Mahavir Vegetables", shortCode: "MAH01", city: "Noida", openingBalance: 8500, openingType: "Dr", createdAt: now },
-    { companyId, yearId, type: "agent", name: "Kishan Lal Agent", shortCode: "AGT01", openingBalance: 0, openingType: "Cr", createdAt: now },
-  ]);
+  // Each master table is seeded independently — only when that specific table is
+  // empty for this (companyId, yearId) scope. New companies/years get the full
+  // default set; deleting individual records won't trigger a re-seed.
 
-  await db.items.bulkAdd([
-    { companyId, yearId, name: "Apple", shortCode: "APL", goodsType: "Fruit", unit: "Kg" },
-    { companyId, yearId, name: "Tomato", shortCode: "TOM", goodsType: "Vegetable", unit: "Kg" },
-    { companyId, yearId, name: "Onion", shortCode: "ONI", goodsType: "Vegetable", unit: "Kg" },
-    { companyId, yearId, name: "Potato", shortCode: "POT", goodsType: "Vegetable", unit: "Kg" },
-    { companyId, yearId, name: "Mango", shortCode: "MAN", goodsType: "Fruit", unit: "Kg" },
-  ]);
+  if ((await db.parties.where({ companyId, yearId }).count()) === 0) {
+    await db.parties.bulkAdd([
+      { companyId, yearId, type: "farmer", name: "Ram Kumar", shortCode: "RAM01", mobile: "9876543210", village: "Sonipat", openingBalance: 0, openingType: "Cr", createdAt: now },
+      { companyId, yearId, type: "farmer", name: "Shyam Singh", shortCode: "SHY01", village: "Karnal", openingBalance: 5000, openingType: "Cr", createdAt: now },
+      { companyId, yearId, type: "buyer", name: "Gupta Traders", shortCode: "GUP01", city: "Delhi", openingBalance: 12000, openingType: "Dr", createdAt: now },
+      { companyId, yearId, type: "buyer", name: "Sharma & Sons", shortCode: "SHA01", city: "Ghaziabad", openingBalance: 0, openingType: "Dr", createdAt: now },
+      { companyId, yearId, type: "buyer", name: "Mahavir Vegetables", shortCode: "MAH01", city: "Noida", openingBalance: 8500, openingType: "Dr", createdAt: now },
+      { companyId, yearId, type: "agent", name: "Kishan Lal Agent", shortCode: "AGT01", openingBalance: 0, openingType: "Cr", createdAt: now },
+    ]);
+  }
 
-  await db.qualities.bulkAdd([
-    { companyId, yearId, name: "Super" },
-    { companyId, yearId, name: "A Grade" },
-    { companyId, yearId, name: "B Grade" },
-    { companyId, yearId, name: "C Grade" },
-  ]);
+  if ((await db.items.where({ companyId, yearId }).count()) === 0) {
+    await db.items.bulkAdd([
+      { companyId, yearId, name: "Apple", shortCode: "APL", goodsType: "Fruit", unit: "Kg" },
+      { companyId, yearId, name: "Tomato", shortCode: "TOM", goodsType: "Vegetable", unit: "Kg" },
+      { companyId, yearId, name: "Onion", shortCode: "ONI", goodsType: "Vegetable", unit: "Kg" },
+      { companyId, yearId, name: "Potato", shortCode: "POT", goodsType: "Vegetable", unit: "Kg" },
+      { companyId, yearId, name: "Mango", shortCode: "MAN", goodsType: "Fruit", unit: "Kg" },
+    ]);
+  }
 
-  await db.sizes.bulkAdd([
-    { companyId, yearId, name: "Small" },
-    { companyId, yearId, name: "Medium" },
-    { companyId, yearId, name: "Large" },
-    { companyId, yearId, name: "20 Layer" },
-    { companyId, yearId, name: "50 Layer" },
-  ]);
+  if ((await db.qualities.where({ companyId, yearId }).count()) === 0) {
+    await db.qualities.bulkAdd([
+      { companyId, yearId, name: "Super" },
+      { companyId, yearId, name: "A Grade" },
+      { companyId, yearId, name: "B Grade" },
+      { companyId, yearId, name: "C Grade" },
+    ]);
+  }
 
-  await db.packings.bulkAdd([
-    { companyId, yearId, name: "Crate", isReturnable: true },
-    { companyId, yearId, name: "Bag", isReturnable: false },
-    { companyId, yearId, name: "Box", isReturnable: false },
-    { companyId, yearId, name: "Carton", isReturnable: false },
-  ]);
+  if ((await db.sizes.where({ companyId, yearId }).count()) === 0) {
+    await db.sizes.bulkAdd([
+      { companyId, yearId, name: "Small" },
+      { companyId, yearId, name: "Medium" },
+      { companyId, yearId, name: "Large" },
+      { companyId, yearId, name: "20 Layer" },
+      { companyId, yearId, name: "50 Layer" },
+    ]);
+  }
 
-  await db.expenseAccounts.bulkAdd([
-    { companyId, yearId, name: "APMC Cess", operator: "percent", value: 1, side: "debit", applyOn: "grower", isPreset: true },
-    { companyId, yearId, name: "Commission (Dalali)", operator: "percent", value: 6, side: "debit", applyOn: "grower", isPreset: true },
-    { companyId, yearId, name: "Hamali", operator: "perUnit", value: 2, side: "debit", applyOn: "grower", isPreset: true },
-    { companyId, yearId, name: "Vapsi (Returns)", operator: "fix", value: 0, side: "debit", applyOn: "buyer", isPreset: true },
-    { companyId, yearId, name: "Tulai (Weighing)", operator: "perUnit", value: 1, side: "debit", applyOn: "grower", isPreset: true },
-  ]);
+  if ((await db.packings.where({ companyId, yearId }).count()) === 0) {
+    await db.packings.bulkAdd([
+      { companyId, yearId, name: "Crate", isReturnable: true },
+      { companyId, yearId, name: "Bag", isReturnable: false },
+      { companyId, yearId, name: "Box", isReturnable: false },
+      { companyId, yearId, name: "Carton", isReturnable: false },
+    ]);
+  }
 
-  await db.stores.bulkAdd([
-    { companyId, yearId, name: "Main Store" },
-    { companyId, yearId, name: "Cold Storage" },
-  ]);
+  if ((await db.expenseAccounts.where({ companyId, yearId }).count()) === 0) {
+    await db.expenseAccounts.bulkAdd([
+      { companyId, yearId, name: "APMC Cess", operator: "percent", value: 1, side: "debit", applyOn: "grower", isPreset: true },
+      { companyId, yearId, name: "Commission (Dalali)", operator: "percent", value: 6, side: "debit", applyOn: "grower", isPreset: true },
+      { companyId, yearId, name: "Hamali", operator: "perUnit", value: 2, side: "debit", applyOn: "grower", isPreset: true },
+      { companyId, yearId, name: "Vapsi (Returns)", operator: "fix", value: 0, side: "debit", applyOn: "buyer", isPreset: true },
+      { companyId, yearId, name: "Tulai (Weighing)", operator: "perUnit", value: 1, side: "debit", applyOn: "grower", isPreset: true },
+    ]);
+  }
+
+  if ((await db.stores.where({ companyId, yearId }).count()) === 0) {
+    await db.stores.bulkAdd([
+      { companyId, yearId, name: "Main Store" },
+      { companyId, yearId, name: "Cold Storage" },
+    ]);
+  }
 }
+
+/**
+ * Create a default financial year for a brand-new company and seed its masters.
+ * Used when the user creates a new company so it isn't blank.
+ */
+export async function ensureCompanyHasYear(companyId: number): Promise<number> {
+  const existing = await db.financialYears.where("companyId").equals(companyId).first();
+  if (existing?.id) {
+    await seedMasters(companyId, existing.id);
+    return existing.id;
+  }
+  // Auto-build a current FY (Apr → Mar India fiscal)
+  const today = new Date();
+  const y = today.getFullYear();
+  const startYear = today.getMonth() >= 3 ? y : y - 1;
+  const label = `${startYear}-${(startYear + 1).toString().slice(-2)}`;
+  const yearId = await db.financialYears.add({
+    companyId,
+    label,
+    startDate: `${startYear}-04-01`,
+    endDate: `${startYear + 1}-03-31`,
+  });
+  await seedMasters(companyId, yearId);
+  return yearId;
+}
+
