@@ -11,7 +11,6 @@ import {
   LogOut,
   Building2,
   CalendarRange,
-  ChevronRight,
 } from "lucide-react";
 import { useAppSession } from "@/lib/session-context";
 import { cn } from "@/lib/utils";
@@ -31,14 +30,12 @@ interface NavGroup {
 const groups: NavGroup[] = [
   {
     label: "Workspace",
-    items: [
-      { label: "Dashboard", to: "/app", icon: LayoutDashboard, shortcut: "F1" },
-    ],
+    items: [{ label: "Dashboard", to: "/app", icon: LayoutDashboard, shortcut: "F1" }],
   },
   {
     label: "Entry",
     items: [
-      { label: "Main Challan Entry", to: "/app/entry/challan", icon: Truck, shortcut: "F2" },
+      { label: "Challan Entry", to: "/app/entry/challan", icon: Truck, shortcut: "F2" },
       { label: "Voucher (Pay/Recv)", to: "/app/entry/voucher", icon: Receipt, shortcut: "F3" },
     ],
   },
@@ -80,88 +77,97 @@ export function AppSidebar() {
   const path = location.pathname;
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground">
+    <aside className="flex h-screen w-[260px] shrink-0 flex-col bg-sidebar text-sidebar-foreground p-4 gap-4">
       {/* Brand */}
-      <div className="flex items-center gap-2 border-b border-sidebar-border px-3 py-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-primary-foreground font-bold">
+      <div className="flex items-center gap-3 px-2 py-1">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-light to-primary text-primary-foreground font-bold shadow-pebble-sm">
           म
         </div>
         <div className="leading-tight">
-          <div className="text-sm font-semibold">Mandi ERP</div>
-          <div className="text-[10px] uppercase tracking-wider opacity-70">Ledger Terminal</div>
+          <div className="text-base font-bold tracking-tight">
+            Mandi<span className="text-primary">ERP</span>
+          </div>
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Trade Suite
+          </div>
         </div>
       </div>
 
       {/* Company / FY context */}
       <Link
         to="/select-context"
-        className="block border-b border-sidebar-border bg-sidebar-accent/40 px-3 py-2 hover:bg-sidebar-accent"
+        className="pebble-sm block px-4 py-3 hover:shadow-pebble transition-shadow"
       >
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider opacity-70">
+        <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
           <Building2 className="h-3 w-3" /> Company
         </div>
-        <div className="truncate text-sm font-medium">{company?.name ?? "—"}</div>
-        <div className="mt-1 flex items-center gap-2 text-[11px] uppercase tracking-wider opacity-70">
+        <div className="truncate text-sm font-semibold mt-0.5">{company?.name ?? "—"}</div>
+        <div className="mt-2 flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
           <CalendarRange className="h-3 w-3" /> FY
         </div>
-        <div className="text-sm font-medium">{year?.label ?? "—"}</div>
+        <div className="text-sm font-semibold">{year?.label ?? "—"}</div>
       </Link>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-2">
+      <nav className="flex-1 overflow-y-auto -mx-1 px-1">
         {groups.map((g) => (
-          <div key={g.label} className="mb-2">
-            <div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider opacity-50">
+          <div key={g.label} className="mb-4">
+            <div className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               {g.label}
             </div>
-            {g.items.map((item) => {
-              const active =
-                item.to === "/app" ? path === "/app" : path.startsWith(item.to);
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  className={cn(
-                    "group flex items-center justify-between gap-2 px-3 py-1.5 text-[13px] transition-colors",
-                    active
-                      ? "bg-primary/15 text-primary border-l-2 border-primary pl-[10px]"
-                      : "hover:bg-sidebar-accent",
-                  )}
-                >
-                  <span className="flex items-center gap-2 truncate">
-                    <Icon className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{item.label}</span>
-                  </span>
-                  {item.shortcut ? (
-                    <span className="rounded border border-sidebar-border px-1 text-[9px] opacity-60">
-                      {item.shortcut}
+            <div className="flex flex-col gap-1">
+              {g.items.map((item) => {
+                const active =
+                  item.to === "/app" ? path === "/app" : path.startsWith(item.to);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={cn(
+                      "group flex items-center justify-between gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium transition-all",
+                      active
+                        ? "bg-card text-primary shadow-pebble-sm"
+                        : "text-muted-foreground hover:bg-card/60 hover:text-foreground",
+                    )}
+                  >
+                    <span className="flex items-center gap-3 truncate">
+                      <Icon className={cn("h-4 w-4 shrink-0", active && "text-primary")} />
+                      <span className="truncate">{item.label}</span>
                     </span>
-                  ) : (
-                    <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-50" />
-                  )}
-                </Link>
-              );
-            })}
+                    {item.shortcut && (
+                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[9px] font-semibold text-muted-foreground">
+                        {item.shortcut}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         ))}
       </nav>
 
       {/* User */}
-      <div className="border-t border-sidebar-border px-3 py-2">
-        <div className="flex items-center justify-between">
-          <div className="leading-tight">
-            <div className="text-xs font-medium">{session?.name}</div>
-            <div className="text-[10px] uppercase tracking-wider opacity-60">{session?.role}</div>
+      <div className="pebble-sm flex items-center justify-between px-3 py-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-light text-primary text-xs font-bold">
+            {session?.name?.slice(0, 2).toUpperCase() ?? "U"}
           </div>
-          <button
-            onClick={logout}
-            className="flex h-7 w-7 items-center justify-center rounded hover:bg-sidebar-accent"
-            title="Logout"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-          </button>
+          <div className="leading-tight min-w-0">
+            <div className="text-xs font-semibold truncate">{session?.name}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              {session?.role}
+            </div>
+          </div>
         </div>
+        <button
+          onClick={logout}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
+          title="Logout"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+        </button>
       </div>
     </aside>
   );
