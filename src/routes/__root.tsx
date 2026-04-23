@@ -67,6 +67,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <SessionProvider>
+      <RouteLoader />
       <RouteGuard />
       <Outlet />
       <Toaster richColors position="top-right" />
