@@ -7,6 +7,7 @@ export const Route = createFileRoute("/app/masters")({
 });
 
 const tabs = [
+  { to: "/app/masters/companies", label: "Companies & Years" },
   { to: "/app/masters/parties", label: "Parties" },
   { to: "/app/masters/items", label: "Items / Quality / Size" },
   { to: "/app/masters/expenses", label: "Expenses & Packing" },
