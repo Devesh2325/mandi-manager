@@ -299,8 +299,8 @@ function ChallanEntryPage() {
               <Field label="Challan #"><input value={challanNo} onChange={(e) => setChallanNo(e.target.value)} className="inp font-mono" /></Field>
               <Field label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
               <Field label="Goods Type">
-                <select value={goodsType} onChange={(e) => setGoodsType(e.target.value)} className="inp">
-                  <option>Vegetable</option><option>Fruit</option><option>Grain</option>
+                <select value={goodsType} onChange={(e) => { setGoodsType(e.target.value); setItemId(""); }} className="inp">
+                  {goodsTypes.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>
               </Field>
               <Field label="Farmer (Supplier) *">
@@ -323,7 +323,7 @@ function ChallanEntryPage() {
               <Field label="Item *">
                 <select value={itemId} onChange={(e) => setItemId(Number(e.target.value) || "")} className="inp">
                   <option value="">— Select item —</option>
-                  {items.map((i) => <option key={i.id} value={i.id}>{i.name} ({i.unit})</option>)}
+                  {items.filter((i) => i.goodsType === goodsType).map((i) => <option key={i.id} value={i.id}>{i.name} ({i.unit})</option>)}
                 </select>
               </Field>
               <Field label="Total Qty (declared)">
