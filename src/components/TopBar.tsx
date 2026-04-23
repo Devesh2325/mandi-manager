@@ -34,8 +34,8 @@ export function TopBar({ title, right }: { title: string; right?: React.ReactNod
           <span className="text-muted-foreground">Date </span>
           <span className="font-medium">{todayISO()}</span>
           <span className="ml-2 text-muted-foreground">Time </span>
-          <span className="font-medium">
-            {time.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+          <span className="font-medium" suppressHydrationWarning>
+            {time ? time.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "--:--"}
           </span>
         </div>
         <button
