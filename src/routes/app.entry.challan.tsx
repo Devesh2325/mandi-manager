@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { db, type AppliedExpense, type Challan, type QualityRow, type SaleLine, type StockEntry, type Teep, type LedgerEntry } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
