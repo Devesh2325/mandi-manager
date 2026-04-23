@@ -26,6 +26,7 @@ import { Route as AppBillsRouteImport } from './routes/app.bills'
 import { Route as AppMastersPartiesRouteImport } from './routes/app.masters.parties'
 import { Route as AppMastersItemsRouteImport } from './routes/app.masters.items'
 import { Route as AppMastersExpensesRouteImport } from './routes/app.masters.expenses'
+import { Route as AppMastersCompaniesRouteImport } from './routes/app.masters.companies'
 import { Route as AppEntryVoucherRouteImport } from './routes/app.entry.voucher'
 import { Route as AppEntryChallanRouteImport } from './routes/app.entry.challan'
 
@@ -114,6 +115,11 @@ const AppMastersExpensesRoute = AppMastersExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => AppMastersRoute,
 } as any)
+const AppMastersCompaniesRoute = AppMastersCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => AppMastersRoute,
+} as any)
 const AppEntryVoucherRoute = AppEntryVoucherRouteImport.update({
   id: '/voucher',
   path: '/voucher',
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/entry/voucher': typeof AppEntryVoucherRoute
+  '/app/masters/companies': typeof AppMastersCompaniesRoute
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/entry/voucher': typeof AppEntryVoucherRoute
+  '/app/masters/companies': typeof AppMastersCompaniesRoute
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/entry/voucher': typeof AppEntryVoucherRoute
+  '/app/masters/companies': typeof AppMastersCompaniesRoute
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/entry/challan'
     | '/app/entry/voucher'
+    | '/app/masters/companies'
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/entry/challan'
     | '/app/entry/voucher'
+    | '/app/masters/companies'
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/entry/challan'
     | '/app/entry/voucher'
+    | '/app/masters/companies'
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
@@ -381,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMastersExpensesRouteImport
       parentRoute: typeof AppMastersRoute
     }
+    '/app/masters/companies': {
+      id: '/app/masters/companies'
+      path: '/companies'
+      fullPath: '/app/masters/companies'
+      preLoaderRoute: typeof AppMastersCompaniesRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
     '/app/entry/voucher': {
       id: '/app/entry/voucher'
       path: '/voucher'
@@ -413,12 +432,14 @@ const AppEntryRouteWithChildren = AppEntryRoute._addFileChildren(
 )
 
 interface AppMastersRouteChildren {
+  AppMastersCompaniesRoute: typeof AppMastersCompaniesRoute
   AppMastersExpensesRoute: typeof AppMastersExpensesRoute
   AppMastersItemsRoute: typeof AppMastersItemsRoute
   AppMastersPartiesRoute: typeof AppMastersPartiesRoute
 }
 
 const AppMastersRouteChildren: AppMastersRouteChildren = {
+  AppMastersCompaniesRoute: AppMastersCompaniesRoute,
   AppMastersExpensesRoute: AppMastersExpensesRoute,
   AppMastersItemsRoute: AppMastersItemsRoute,
   AppMastersPartiesRoute: AppMastersPartiesRoute,
