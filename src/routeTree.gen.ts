@@ -23,6 +23,7 @@ import { Route as AppLedgerRouteImport } from './routes/app.ledger'
 import { Route as AppEntryRouteImport } from './routes/app.entry'
 import { Route as AppCashbookRouteImport } from './routes/app.cashbook'
 import { Route as AppBillsRouteImport } from './routes/app.bills'
+import { Route as AppStockSaleRouteImport } from './routes/app.stock.sale'
 import { Route as AppMastersPartiesRouteImport } from './routes/app.masters.parties'
 import { Route as AppMastersItemsRouteImport } from './routes/app.masters.items'
 import { Route as AppMastersExpensesRouteImport } from './routes/app.masters.expenses'
@@ -100,6 +101,11 @@ const AppBillsRoute = AppBillsRouteImport.update({
   path: '/bills',
   getParentRoute: () => AppRoute,
 } as any)
+const AppStockSaleRoute = AppStockSaleRouteImport.update({
+  id: '/sale',
+  path: '/sale',
+  getParentRoute: () => AppStockRoute,
+} as any)
 const AppMastersPartiesRoute = AppMastersPartiesRouteImport.update({
   id: '/parties',
   path: '/parties',
@@ -142,7 +148,7 @@ export interface FileRoutesByFullPath {
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app/reports': typeof AppReportsRoute
-  '/app/stock': typeof AppStockRoute
+  '/app/stock': typeof AppStockRouteWithChildren
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
   '/app/': typeof AppIndexRoute
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
+  '/app/stock/sale': typeof AppStockSaleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -163,7 +170,7 @@ export interface FileRoutesByTo {
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app/reports': typeof AppReportsRoute
-  '/app/stock': typeof AppStockRoute
+  '/app/stock': typeof AppStockRouteWithChildren
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
   '/app': typeof AppIndexRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
+  '/app/stock/sale': typeof AppStockSaleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -186,7 +194,7 @@ export interface FileRoutesById {
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app/reports': typeof AppReportsRoute
-  '/app/stock': typeof AppStockRoute
+  '/app/stock': typeof AppStockRouteWithChildren
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
   '/app/': typeof AppIndexRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/app/masters/expenses': typeof AppMastersExpensesRoute
   '/app/masters/items': typeof AppMastersItemsRoute
   '/app/masters/parties': typeof AppMastersPartiesRoute
+  '/app/stock/sale': typeof AppStockSaleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
+    | '/app/stock/sale'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
+    | '/app/stock/sale'
   id:
     | '__root__'
     | '/'
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/app/masters/expenses'
     | '/app/masters/items'
     | '/app/masters/parties'
+    | '/app/stock/sale'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -372,6 +384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBillsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/stock/sale': {
+      id: '/app/stock/sale'
+      path: '/sale'
+      fullPath: '/app/stock/sale'
+      preLoaderRoute: typeof AppStockSaleRouteImport
+      parentRoute: typeof AppStockRoute
+    }
     '/app/masters/parties': {
       id: '/app/masters/parties'
       path: '/parties'
@@ -449,6 +468,18 @@ const AppMastersRouteWithChildren = AppMastersRoute._addFileChildren(
   AppMastersRouteChildren,
 )
 
+interface AppStockRouteChildren {
+  AppStockSaleRoute: typeof AppStockSaleRoute
+}
+
+const AppStockRouteChildren: AppStockRouteChildren = {
+  AppStockSaleRoute: AppStockSaleRoute,
+}
+
+const AppStockRouteWithChildren = AppStockRoute._addFileChildren(
+  AppStockRouteChildren,
+)
+
 interface AppRouteChildren {
   AppBillsRoute: typeof AppBillsRoute
   AppCashbookRoute: typeof AppCashbookRoute
@@ -456,7 +487,7 @@ interface AppRouteChildren {
   AppLedgerRoute: typeof AppLedgerRoute
   AppMastersRoute: typeof AppMastersRouteWithChildren
   AppReportsRoute: typeof AppReportsRoute
-  AppStockRoute: typeof AppStockRoute
+  AppStockRoute: typeof AppStockRouteWithChildren
   AppTeepRoute: typeof AppTeepRoute
   AppTrialBalanceRoute: typeof AppTrialBalanceRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -469,7 +500,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLedgerRoute: AppLedgerRoute,
   AppMastersRoute: AppMastersRouteWithChildren,
   AppReportsRoute: AppReportsRoute,
-  AppStockRoute: AppStockRoute,
+  AppStockRoute: AppStockRouteWithChildren,
   AppTeepRoute: AppTeepRoute,
   AppTrialBalanceRoute: AppTrialBalanceRoute,
   AppIndexRoute: AppIndexRoute,
