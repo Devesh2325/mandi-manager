@@ -63,14 +63,17 @@ function ChallanEntryPage() {
     })();
   }, [companyId, yearId, ready]);
 
-  // Auto lot no on first row
+  // Auto lot no on first row (only when farmer/date changes, not on every row edit)
   useEffect(() => {
-    if (rows.length === 1 && !rows[0].lotNo && farmerId) {
+    if (!farmerId) return;
+    setRows((r) => {
+      if (r.length !== 1 || r[0].lotNo) return r;
       const farmer = farmers.find((f) => f.id === farmerId);
       const code = farmer?.shortCode ?? "LOT";
-      setRows((r) => r.map((row, i) => i === 0 ? { ...row, lotNo: `${date.replace(/-/g, "").slice(4)}-${code}-1` } : row));
-    }
-  }, [farmerId, date, farmers, rows]);
+      return r.map((row, i) => i === 0 ? { ...row, lotNo: `${date.replace(/-/g, "").slice(4)}-${code}-1` } : row);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [farmerId, date]);
 
   // Quick add party modal
   const [partyDraft, setPartyDraft] = useState<null | { target: "farmer" | "buyer" | "agent"; rowId?: string; saleIdx?: number }>(null);
