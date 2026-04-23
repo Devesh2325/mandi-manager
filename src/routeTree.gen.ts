@@ -13,6 +13,11 @@ import { Route as SelectContextRouteImport } from './routes/select-context'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppMastersRouteImport } from './routes/app.masters'
+import { Route as AppMastersPartiesRouteImport } from './routes/app.masters.parties'
+import { Route as AppMastersItemsRouteImport } from './routes/app.masters.items'
+import { Route as AppMastersExpensesRouteImport } from './routes/app.masters.expenses'
 
 const SelectContextRoute = SelectContextRouteImport.update({
   id: '/select-context',
@@ -34,37 +39,103 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMastersRoute = AppMastersRouteImport.update({
+  id: '/masters',
+  path: '/masters',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMastersPartiesRoute = AppMastersPartiesRouteImport.update({
+  id: '/parties',
+  path: '/parties',
+  getParentRoute: () => AppMastersRoute,
+} as any)
+const AppMastersItemsRoute = AppMastersItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
+  getParentRoute: () => AppMastersRoute,
+} as any)
+const AppMastersExpensesRoute = AppMastersExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => AppMastersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/app/masters': typeof AppMastersRouteWithChildren
+  '/app/': typeof AppIndexRoute
+  '/app/masters/expenses': typeof AppMastersExpensesRoute
+  '/app/masters/items': typeof AppMastersItemsRoute
+  '/app/masters/parties': typeof AppMastersPartiesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/app/masters': typeof AppMastersRouteWithChildren
+  '/app': typeof AppIndexRoute
+  '/app/masters/expenses': typeof AppMastersExpensesRoute
+  '/app/masters/items': typeof AppMastersItemsRoute
+  '/app/masters/parties': typeof AppMastersPartiesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRoute
+  '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/app/masters': typeof AppMastersRouteWithChildren
+  '/app/': typeof AppIndexRoute
+  '/app/masters/expenses': typeof AppMastersExpensesRoute
+  '/app/masters/items': typeof AppMastersItemsRoute
+  '/app/masters/parties': typeof AppMastersPartiesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/login' | '/select-context'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/select-context'
+    | '/app/masters'
+    | '/app/'
+    | '/app/masters/expenses'
+    | '/app/masters/items'
+    | '/app/masters/parties'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/login' | '/select-context'
-  id: '__root__' | '/' | '/app' | '/login' | '/select-context'
+  to:
+    | '/'
+    | '/login'
+    | '/select-context'
+    | '/app/masters'
+    | '/app'
+    | '/app/masters/expenses'
+    | '/app/masters/items'
+    | '/app/masters/parties'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/select-context'
+    | '/app/masters'
+    | '/app/'
+    | '/app/masters/expenses'
+    | '/app/masters/items'
+    | '/app/masters/parties'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRoute
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   SelectContextRoute: typeof SelectContextRoute
 }
@@ -99,12 +170,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/masters': {
+      id: '/app/masters'
+      path: '/masters'
+      fullPath: '/app/masters'
+      preLoaderRoute: typeof AppMastersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/masters/parties': {
+      id: '/app/masters/parties'
+      path: '/parties'
+      fullPath: '/app/masters/parties'
+      preLoaderRoute: typeof AppMastersPartiesRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
+    '/app/masters/items': {
+      id: '/app/masters/items'
+      path: '/items'
+      fullPath: '/app/masters/items'
+      preLoaderRoute: typeof AppMastersItemsRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
+    '/app/masters/expenses': {
+      id: '/app/masters/expenses'
+      path: '/expenses'
+      fullPath: '/app/masters/expenses'
+      preLoaderRoute: typeof AppMastersExpensesRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
   }
 }
 
+interface AppMastersRouteChildren {
+  AppMastersExpensesRoute: typeof AppMastersExpensesRoute
+  AppMastersItemsRoute: typeof AppMastersItemsRoute
+  AppMastersPartiesRoute: typeof AppMastersPartiesRoute
+}
+
+const AppMastersRouteChildren: AppMastersRouteChildren = {
+  AppMastersExpensesRoute: AppMastersExpensesRoute,
+  AppMastersItemsRoute: AppMastersItemsRoute,
+  AppMastersPartiesRoute: AppMastersPartiesRoute,
+}
+
+const AppMastersRouteWithChildren = AppMastersRoute._addFileChildren(
+  AppMastersRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppMastersRoute: typeof AppMastersRouteWithChildren
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppMastersRoute: AppMastersRouteWithChildren,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRoute,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   SelectContextRoute: SelectContextRoute,
 }
