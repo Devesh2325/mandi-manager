@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, seedMasters, type Company, type FinancialYear } from "@/lib/db";
+import { db, seedMasters, ensureCompanyHasYear, type Company, type FinancialYear } from "@/lib/db";
 import { useAppSession } from "@/lib/session-context";
 import { Plus, Trash2, Pencil, Building2, CalendarRange, CheckCircle2 } from "lucide-react";
 
@@ -35,8 +35,14 @@ function CompaniesPage() {
       gstin: editingCo.gstin,
       createdAt: editingCo.createdAt ?? Date.now(),
     };
-    if (editingCo.id) await db.companies.update(editingCo.id, data);
-    else await db.companies.add(data);
+    if (editingCo.id) {
+      await db.companies.update(editingCo.id, data);
+    } else {
+      const newId = await db.companies.add(data);
+      // Auto-create a default FY + seed masters so the new company is usable immediately.
+      await ensureCompanyHasYear(newId as number);
+      setSelectedCompanyId(newId as number);
+    }
     setEditingCo(null);
   };
 
