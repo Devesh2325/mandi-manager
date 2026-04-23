@@ -3,10 +3,11 @@ import { todayISO } from "@/lib/format";
 import { Search, Bell, Sun, Moon } from "lucide-react";
 
 export function TopBar({ title, right }: { title: string; right?: React.ReactNode }) {
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState<Date | null>(null);
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
+    setTime(new Date());
     const t = setInterval(() => setTime(new Date()), 30_000);
     return () => clearInterval(t);
   }, []);
