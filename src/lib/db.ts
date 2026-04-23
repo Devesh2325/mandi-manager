@@ -302,10 +302,13 @@ export async function seedIfEmpty() {
 }
 
 export async function seedMasters(companyId: number, yearId: number) {
-  const has = await db.parties.where({ companyId, yearId }).count();
-  if (has > 0) return;
-
   const now = Date.now();
+
+  // Seed each master table independently — only if that specific table is empty for this scope.
+  // This way, deleting all parties (or items, etc.) won't trigger a re-seed unless ALL of that
+  // type are gone. New companies/years get the full default set.
+  const partyCount = await db.parties.where({ companyId, yearId }).count();
+  if (partyCount === 0) {
   await db.parties.bulkAdd([
     { companyId, yearId, type: "farmer", name: "Ram Kumar", shortCode: "RAM01", mobile: "9876543210", village: "Sonipat", openingBalance: 0, openingType: "Cr", createdAt: now },
     { companyId, yearId, type: "farmer", name: "Shyam Singh", shortCode: "SHY01", village: "Karnal", openingBalance: 5000, openingType: "Cr", createdAt: now },
