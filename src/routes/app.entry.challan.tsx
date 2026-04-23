@@ -379,46 +379,58 @@ function ChallanEntryPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td className="font-medium">Qty</td>
-                        {sizes.map((s) => (
-                          <td key={s.id} className="num">
-                            <input
-                              type="number"
-                              className="grid-input text-right"
-                              value={row.matrix?.[String(s.id)]?.qty || ""}
-                              onChange={(e) => {
-                                const m = { ...(row.matrix ?? {}) };
-                                const key = String(s.id);
-                                m[key] = { qty: Number(e.target.value), rate: m[key]?.rate ?? 0 };
-                                updateRow(row.id, { matrix: m });
-                              }}
-                            />
-                          </td>
-                        ))}
-                        <td className="num tabular">{fmtQty(Object.values(row.matrix ?? {}).reduce((a, b) => a + (b.qty || 0), 0))}</td>
-                        <td className="num text-muted-foreground">—</td>
-                      </tr>
-                      <tr>
-                        <td className="font-medium">Rate</td>
-                        {sizes.map((s) => (
-                          <td key={s.id} className="num">
-                            <input
-                              type="number"
-                              className="grid-input text-right"
-                              value={row.matrix?.[String(s.id)]?.rate || ""}
-                              onChange={(e) => {
-                                const m = { ...(row.matrix ?? {}) };
-                                const key = String(s.id);
-                                m[key] = { qty: m[key]?.qty ?? 0, rate: Number(e.target.value) };
-                                updateRow(row.id, { matrix: m });
-                              }}
-                            />
-                          </td>
-                        ))}
-                        <td className="num text-muted-foreground">—</td>
-                        <td className="num text-muted-foreground">—</td>
-                      </tr>
+                      {(() => {
+                        const entries = Object.values(row.matrix ?? {});
+                        const totalQty = entries.reduce((a, b) => a + (Number(b.qty) || 0), 0);
+                        const totalAmt = entries.reduce((a, b) => a + (Number(b.qty) || 0) * (Number(b.rate) || 0), 0);
+                        const avgRate = totalQty > 0 ? totalAmt / totalQty : 0;
+                        return (
+                          <>
+                            <tr>
+                              <td className="font-medium">Qty</td>
+                              {sizes.map((s) => (
+                                <td key={s.id} className="num">
+                                  <input
+                                    type="number"
+                                    className="grid-input text-right"
+                                    value={row.matrix?.[String(s.id)]?.qty || ""}
+                                    onChange={(e) => {
+                                      const m = { ...(row.matrix ?? {}) };
+                                      const key = String(s.id);
+                                      m[key] = { qty: Number(e.target.value), rate: m[key]?.rate ?? 0 };
+                                      updateRow(row.id, { matrix: m });
+                                    }}
+                                  />
+                                </td>
+                              ))}
+                              <td className="num tabular">{fmtQty(totalQty)}</td>
+                              <td className="num tabular font-semibold text-primary">
+                                {avgRate > 0 ? fmtINR(round2(avgRate)) : "—"}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td className="font-medium">Rate</td>
+                              {sizes.map((s) => (
+                                <td key={s.id} className="num">
+                                  <input
+                                    type="number"
+                                    className="grid-input text-right"
+                                    value={row.matrix?.[String(s.id)]?.rate || ""}
+                                    onChange={(e) => {
+                                      const m = { ...(row.matrix ?? {}) };
+                                      const key = String(s.id);
+                                      m[key] = { qty: m[key]?.qty ?? 0, rate: Number(e.target.value) };
+                                      updateRow(row.id, { matrix: m });
+                                    }}
+                                  />
+                                </td>
+                              ))}
+                              <td className="num tabular text-muted-foreground">{fmtINR(round2(totalAmt))}</td>
+                              <td className="num text-muted-foreground">—</td>
+                            </tr>
+                          </>
+                        );
+                      })()}
                     </tbody>
                   </table>
                 </div>
