@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { db, type AppliedExpense, type Challan, type QualityRow, type SaleLine, type StockEntry, type Teep, type LedgerEntry } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
@@ -63,14 +63,17 @@ function ChallanEntryPage() {
     })();
   }, [companyId, yearId, ready]);
 
-  // Auto lot no on first row
+  // Auto lot no on first row (only when farmer/date changes, not on every row edit)
   useEffect(() => {
-    if (rows.length === 1 && !rows[0].lotNo && farmerId) {
+    if (!farmerId) return;
+    setRows((r) => {
+      if (r.length !== 1 || r[0].lotNo) return r;
       const farmer = farmers.find((f) => f.id === farmerId);
       const code = farmer?.shortCode ?? "LOT";
-      setRows((r) => r.map((row, i) => i === 0 ? { ...row, lotNo: `${date.replace(/-/g, "").slice(4)}-${code}-1` } : row));
-    }
-  }, [farmerId, date, farmers, rows]);
+      return r.map((row, i) => i === 0 ? { ...row, lotNo: `${date.replace(/-/g, "").slice(4)}-${code}-1` } : row);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [farmerId, date]);
 
   // Quick add party modal
   const [partyDraft, setPartyDraft] = useState<null | { target: "farmer" | "buyer" | "agent"; rowId?: string; saleIdx?: number }>(null);
@@ -253,15 +256,29 @@ function ChallanEntryPage() {
     }
   };
 
-  // Keyboard: Ctrl+S save, Ctrl+N new row
+  // Keyboard: Ctrl+S save, Ctrl+N new row — use refs to avoid re-binding listener every render
+  const saveRef = useRef(save);
+  const addRowRef = useRef(addRow);
+  const canSaveRef = useRef(canSave);
+  const savingRef = useRef(saving);
+  saveRef.current = save;
+  addRowRef.current = addRow;
+  canSaveRef.current = canSave;
+  savingRef.current = saving;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); if (canSave && !saving) save(); }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") { e.preventDefault(); addRow(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (canSaveRef.current && !savingRef.current) saveRef.current();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        addRowRef.current();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  });
+  }, []);
 
   return (
     <>
