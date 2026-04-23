@@ -345,7 +345,7 @@ function ChallanEntryPage() {
                   <Field label="Quality" sm>
                     <select value={row.qualityId ?? ""} onChange={(e) => updateRow(row.id, { qualityId: Number(e.target.value) || undefined })} className="inp">
                       <option value="">—</option>
-                      {qualities.map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
+                      {qualities.filter((q) => !q.itemId || q.itemId === Number(itemId)).map((q) => <option key={q.id} value={q.id}>{q.name}</option>)}
                     </select>
                   </Field>
                   <Field label="Lot No" sm><input value={row.lotNo} onChange={(e) => updateRow(row.id, { lotNo: e.target.value })} className="inp font-mono" /></Field>
