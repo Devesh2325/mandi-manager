@@ -256,15 +256,29 @@ function ChallanEntryPage() {
     }
   };
 
-  // Keyboard: Ctrl+S save, Ctrl+N new row
+  // Keyboard: Ctrl+S save, Ctrl+N new row — use refs to avoid re-binding listener every render
+  const saveRef = useRef(save);
+  const addRowRef = useRef(addRow);
+  const canSaveRef = useRef(canSave);
+  const savingRef = useRef(saving);
+  saveRef.current = save;
+  addRowRef.current = addRow;
+  canSaveRef.current = canSave;
+  savingRef.current = saving;
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); if (canSave && !saving) save(); }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") { e.preventDefault(); addRow(); }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (canSaveRef.current && !savingRef.current) saveRef.current();
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        addRowRef.current();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  });
+  }, []);
 
   return (
     <>
