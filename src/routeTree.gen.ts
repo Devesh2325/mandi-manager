@@ -9,38 +9,280 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SelectContextRouteImport } from './routes/select-context'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppTrialBalanceRouteImport } from './routes/app.trial-balance'
+import { Route as AppTeepRouteImport } from './routes/app.teep'
+import { Route as AppStockRouteImport } from './routes/app.stock'
+import { Route as AppReportsRouteImport } from './routes/app.reports'
+import { Route as AppMastersRouteImport } from './routes/app.masters'
+import { Route as AppLedgerRouteImport } from './routes/app.ledger'
+import { Route as AppEntryRouteImport } from './routes/app.entry'
+import { Route as AppCashbookRouteImport } from './routes/app.cashbook'
+import { Route as AppBillsRouteImport } from './routes/app.bills'
+import { Route as AppMastersPartiesRouteImport } from './routes/app.masters.parties'
+import { Route as AppMastersItemsRouteImport } from './routes/app.masters.items'
+import { Route as AppMastersExpensesRouteImport } from './routes/app.masters.expenses'
+import { Route as AppEntryVoucherRouteImport } from './routes/app.entry.voucher'
+import { Route as AppEntryChallanRouteImport } from './routes/app.entry.challan'
 
+const SelectContextRoute = SelectContextRouteImport.update({
+  id: '/select-context',
+  path: '/select-context',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTrialBalanceRoute = AppTrialBalanceRouteImport.update({
+  id: '/trial-balance',
+  path: '/trial-balance',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTeepRoute = AppTeepRouteImport.update({
+  id: '/teep',
+  path: '/teep',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStockRoute = AppStockRouteImport.update({
+  id: '/stock',
+  path: '/stock',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMastersRoute = AppMastersRouteImport.update({
+  id: '/masters',
+  path: '/masters',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLedgerRoute = AppLedgerRouteImport.update({
+  id: '/ledger',
+  path: '/ledger',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEntryRoute = AppEntryRouteImport.update({
+  id: '/entry',
+  path: '/entry',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCashbookRoute = AppCashbookRouteImport.update({
+  id: '/cashbook',
+  path: '/cashbook',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBillsRoute = AppBillsRouteImport.update({
+  id: '/bills',
+  path: '/bills',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMastersPartiesRoute = AppMastersPartiesRouteImport.update({
+  id: '/parties',
+  path: '/parties',
+  getParentRoute: () => AppMastersRoute,
+} as any)
+const AppMastersItemsRoute = AppMastersItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
+  getParentRoute: () => AppMastersRoute,
+} as any)
+const AppMastersExpensesRoute = AppMastersExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => AppMastersRoute,
+} as any)
+const AppEntryVoucherRoute = AppEntryVoucherRouteImport.update({
+  id: '/voucher',
+  path: '/voucher',
+  getParentRoute: () => AppEntryRoute,
+} as any)
+const AppEntryChallanRoute = AppEntryChallanRouteImport.update({
+  id: '/challan',
+  path: '/challan',
+  getParentRoute: () => AppEntryRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/select-context': typeof SelectContextRoute
+  '/app/bills': typeof AppBillsRoute
+  '/app/cashbook': typeof AppCashbookRoute
+  '/app/entry': typeof AppEntryRouteWithChildren
+  '/app/ledger': typeof AppLedgerRoute
+  '/app/masters': typeof AppMastersRouteWithChildren
+  '/app/reports': typeof AppReportsRoute
+  '/app/stock': typeof AppStockRoute
+  '/app/teep': typeof AppTeepRoute
+  '/app/trial-balance': typeof AppTrialBalanceRoute
+  '/app/': typeof AppIndexRoute
+  '/app/entry/challan': typeof AppEntryChallanRoute
+  '/app/entry/voucher': typeof AppEntryVoucherRoute
+  '/app/masters/expenses': typeof AppMastersExpensesRoute
+  '/app/masters/items': typeof AppMastersItemsRoute
+  '/app/masters/parties': typeof AppMastersPartiesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/select-context': typeof SelectContextRoute
+  '/app/bills': typeof AppBillsRoute
+  '/app/cashbook': typeof AppCashbookRoute
+  '/app/entry': typeof AppEntryRouteWithChildren
+  '/app/ledger': typeof AppLedgerRoute
+  '/app/masters': typeof AppMastersRouteWithChildren
+  '/app/reports': typeof AppReportsRoute
+  '/app/stock': typeof AppStockRoute
+  '/app/teep': typeof AppTeepRoute
+  '/app/trial-balance': typeof AppTrialBalanceRoute
+  '/app': typeof AppIndexRoute
+  '/app/entry/challan': typeof AppEntryChallanRoute
+  '/app/entry/voucher': typeof AppEntryVoucherRoute
+  '/app/masters/expenses': typeof AppMastersExpensesRoute
+  '/app/masters/items': typeof AppMastersItemsRoute
+  '/app/masters/parties': typeof AppMastersPartiesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/select-context': typeof SelectContextRoute
+  '/app/bills': typeof AppBillsRoute
+  '/app/cashbook': typeof AppCashbookRoute
+  '/app/entry': typeof AppEntryRouteWithChildren
+  '/app/ledger': typeof AppLedgerRoute
+  '/app/masters': typeof AppMastersRouteWithChildren
+  '/app/reports': typeof AppReportsRoute
+  '/app/stock': typeof AppStockRoute
+  '/app/teep': typeof AppTeepRoute
+  '/app/trial-balance': typeof AppTrialBalanceRoute
+  '/app/': typeof AppIndexRoute
+  '/app/entry/challan': typeof AppEntryChallanRoute
+  '/app/entry/voucher': typeof AppEntryVoucherRoute
+  '/app/masters/expenses': typeof AppMastersExpensesRoute
+  '/app/masters/items': typeof AppMastersItemsRoute
+  '/app/masters/parties': typeof AppMastersPartiesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/select-context'
+    | '/app/bills'
+    | '/app/cashbook'
+    | '/app/entry'
+    | '/app/ledger'
+    | '/app/masters'
+    | '/app/reports'
+    | '/app/stock'
+    | '/app/teep'
+    | '/app/trial-balance'
+    | '/app/'
+    | '/app/entry/challan'
+    | '/app/entry/voucher'
+    | '/app/masters/expenses'
+    | '/app/masters/items'
+    | '/app/masters/parties'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/select-context'
+    | '/app/bills'
+    | '/app/cashbook'
+    | '/app/entry'
+    | '/app/ledger'
+    | '/app/masters'
+    | '/app/reports'
+    | '/app/stock'
+    | '/app/teep'
+    | '/app/trial-balance'
+    | '/app'
+    | '/app/entry/challan'
+    | '/app/entry/voucher'
+    | '/app/masters/expenses'
+    | '/app/masters/items'
+    | '/app/masters/parties'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/select-context'
+    | '/app/bills'
+    | '/app/cashbook'
+    | '/app/entry'
+    | '/app/ledger'
+    | '/app/masters'
+    | '/app/reports'
+    | '/app/stock'
+    | '/app/teep'
+    | '/app/trial-balance'
+    | '/app/'
+    | '/app/entry/challan'
+    | '/app/entry/voucher'
+    | '/app/masters/expenses'
+    | '/app/masters/items'
+    | '/app/masters/parties'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SelectContextRoute: typeof SelectContextRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/select-context': {
+      id: '/select-context'
+      path: '/select-context'
+      fullPath: '/select-context'
+      preLoaderRoute: typeof SelectContextRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,21 +290,178 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/trial-balance': {
+      id: '/app/trial-balance'
+      path: '/trial-balance'
+      fullPath: '/app/trial-balance'
+      preLoaderRoute: typeof AppTrialBalanceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/teep': {
+      id: '/app/teep'
+      path: '/teep'
+      fullPath: '/app/teep'
+      preLoaderRoute: typeof AppTeepRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/stock': {
+      id: '/app/stock'
+      path: '/stock'
+      fullPath: '/app/stock'
+      preLoaderRoute: typeof AppStockRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/reports': {
+      id: '/app/reports'
+      path: '/reports'
+      fullPath: '/app/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/masters': {
+      id: '/app/masters'
+      path: '/masters'
+      fullPath: '/app/masters'
+      preLoaderRoute: typeof AppMastersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/ledger': {
+      id: '/app/ledger'
+      path: '/ledger'
+      fullPath: '/app/ledger'
+      preLoaderRoute: typeof AppLedgerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/entry': {
+      id: '/app/entry'
+      path: '/entry'
+      fullPath: '/app/entry'
+      preLoaderRoute: typeof AppEntryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/cashbook': {
+      id: '/app/cashbook'
+      path: '/cashbook'
+      fullPath: '/app/cashbook'
+      preLoaderRoute: typeof AppCashbookRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/bills': {
+      id: '/app/bills'
+      path: '/bills'
+      fullPath: '/app/bills'
+      preLoaderRoute: typeof AppBillsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/masters/parties': {
+      id: '/app/masters/parties'
+      path: '/parties'
+      fullPath: '/app/masters/parties'
+      preLoaderRoute: typeof AppMastersPartiesRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
+    '/app/masters/items': {
+      id: '/app/masters/items'
+      path: '/items'
+      fullPath: '/app/masters/items'
+      preLoaderRoute: typeof AppMastersItemsRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
+    '/app/masters/expenses': {
+      id: '/app/masters/expenses'
+      path: '/expenses'
+      fullPath: '/app/masters/expenses'
+      preLoaderRoute: typeof AppMastersExpensesRouteImport
+      parentRoute: typeof AppMastersRoute
+    }
+    '/app/entry/voucher': {
+      id: '/app/entry/voucher'
+      path: '/voucher'
+      fullPath: '/app/entry/voucher'
+      preLoaderRoute: typeof AppEntryVoucherRouteImport
+      parentRoute: typeof AppEntryRoute
+    }
+    '/app/entry/challan': {
+      id: '/app/entry/challan'
+      path: '/challan'
+      fullPath: '/app/entry/challan'
+      preLoaderRoute: typeof AppEntryChallanRouteImport
+      parentRoute: typeof AppEntryRoute
+    }
   }
 }
 
+interface AppEntryRouteChildren {
+  AppEntryChallanRoute: typeof AppEntryChallanRoute
+  AppEntryVoucherRoute: typeof AppEntryVoucherRoute
+}
+
+const AppEntryRouteChildren: AppEntryRouteChildren = {
+  AppEntryChallanRoute: AppEntryChallanRoute,
+  AppEntryVoucherRoute: AppEntryVoucherRoute,
+}
+
+const AppEntryRouteWithChildren = AppEntryRoute._addFileChildren(
+  AppEntryRouteChildren,
+)
+
+interface AppMastersRouteChildren {
+  AppMastersExpensesRoute: typeof AppMastersExpensesRoute
+  AppMastersItemsRoute: typeof AppMastersItemsRoute
+  AppMastersPartiesRoute: typeof AppMastersPartiesRoute
+}
+
+const AppMastersRouteChildren: AppMastersRouteChildren = {
+  AppMastersExpensesRoute: AppMastersExpensesRoute,
+  AppMastersItemsRoute: AppMastersItemsRoute,
+  AppMastersPartiesRoute: AppMastersPartiesRoute,
+}
+
+const AppMastersRouteWithChildren = AppMastersRoute._addFileChildren(
+  AppMastersRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppBillsRoute: typeof AppBillsRoute
+  AppCashbookRoute: typeof AppCashbookRoute
+  AppEntryRoute: typeof AppEntryRouteWithChildren
+  AppLedgerRoute: typeof AppLedgerRoute
+  AppMastersRoute: typeof AppMastersRouteWithChildren
+  AppReportsRoute: typeof AppReportsRoute
+  AppStockRoute: typeof AppStockRoute
+  AppTeepRoute: typeof AppTeepRoute
+  AppTrialBalanceRoute: typeof AppTrialBalanceRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppBillsRoute: AppBillsRoute,
+  AppCashbookRoute: AppCashbookRoute,
+  AppEntryRoute: AppEntryRouteWithChildren,
+  AppLedgerRoute: AppLedgerRoute,
+  AppMastersRoute: AppMastersRouteWithChildren,
+  AppReportsRoute: AppReportsRoute,
+  AppStockRoute: AppStockRoute,
+  AppTeepRoute: AppTeepRoute,
+  AppTrialBalanceRoute: AppTrialBalanceRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  SelectContextRoute: SelectContextRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

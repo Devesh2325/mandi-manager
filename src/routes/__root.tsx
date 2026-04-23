@@ -1,5 +1,6 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-
+import { Outlet, createRootRoute, HeadContent, Scripts, useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { SessionProvider, useAppSession } from "@/lib/session-context";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -12,12 +13,12 @@ function NotFoundComponent() {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-6">
-          <Link
-            to="/"
+          <a
+            href="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Go home
-          </Link>
+          </a>
         </div>
       </div>
     </div>
@@ -29,21 +30,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { title: "Mandi ERP — Ledger Terminal" },
+      { name: "description", content: "APMC commission-agent mandi ERP: arrival, sale, ledger, billing." },
     ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-    ],
+    links: [{ rel: "stylesheet", href: appCss }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -65,5 +55,46 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <SessionProvider>
+      <RouteGuard />
+      <Outlet />
+    </SessionProvider>
+  );
+}
+
+/** Redirects: not logged in -> /login. Logged in but no company/year -> /select-context. */
+function RouteGuard() {
+  const { ready, session, company, year } = useAppSession();
+  const router = useRouter();
+  const path = router.state.location.pathname;
+
+  useEffect(() => {
+    if (!ready) return;
+    const isLogin = path === "/login";
+    const isSelect = path === "/select-context";
+    const isApp = path === "/app" || path.startsWith("/app/");
+
+    if (!session && !isLogin) {
+      router.navigate({ to: "/login" });
+      return;
+    }
+    if (session && (!company || !year) && isApp) {
+      router.navigate({ to: "/select-context" });
+      return;
+    }
+    if (session && company && year && (isLogin || isSelect)) {
+      router.navigate({ to: "/app" });
+      return;
+    }
+    if (path === "/" && session && company && year) {
+      router.navigate({ to: "/app" });
+    } else if (path === "/" && session) {
+      router.navigate({ to: "/select-context" });
+    } else if (path === "/" && !session) {
+      router.navigate({ to: "/login" });
+    }
+  }, [ready, session, company, year, path, router]);
+
+  return null;
 }
