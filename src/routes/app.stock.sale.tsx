@@ -242,6 +242,15 @@ function StockSalePage() {
           >
             <Save className="h-4 w-4" /> Save Sale
           </button>
+          {!canSave && (
+            <div className="mt-2 text-[11px] text-muted-foreground">
+              {!selected && "• Select a stock lot from the list "}
+              {!buyerId && "• Choose a buyer "}
+              {!(qty > 0) && "• Enter qty "}
+              {!(rate > 0) && "• Enter rate "}
+              {selected && qty > selected.balance && `• Qty exceeds balance (${fmtQty(selected.balance)}) `}
+            </div>
+          )}
         </div>
       </div>
       <style>{`.inp{width:100%;border:1px solid var(--input);background:var(--background);padding:6px 10px;font-size:13px;border-radius:4px}.inp:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 1px var(--ring)}`}</style>
