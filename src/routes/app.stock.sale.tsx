@@ -7,7 +7,8 @@ import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
 import { fmtINR, fmtQty, todayISO } from "@/lib/format";
 import { computeExpenses, round2 } from "@/lib/calc";
-import { Save, AlertCircle } from "lucide-react";
+import { Save, AlertCircle, Plus } from "lucide-react";
+import { PartyEditor, generateShortCode } from "./app.masters.parties";
 
 export const Route = createFileRoute("/app/stock/sale")({
   component: StockSalePage,
@@ -77,6 +78,17 @@ function StockSalePage() {
   const [qty, setQty] = useState<number>(0);
   const [rate, setRate] = useState<number>(0);
   const [teepNo, setTeepNo] = useState("");
+  const [buyerDraft, setBuyerDraft] = useState<null | {
+    type: "buyer";
+    name?: string;
+    shortCode?: string;
+    mobile?: string;
+    village?: string;
+    city?: string;
+    openingBalance: number;
+    openingType: "Dr" | "Cr";
+    creditLimit?: number;
+  }>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -108,6 +120,16 @@ function StockSalePage() {
     if (selected) setQty(selected.balance);
   }, [selected]);
 
+  useEffect(() => {
+    if (buyers.length === 0) {
+      setBuyerId("");
+      return;
+    }
+
+    if (buyerId && buyers.some((b) => b.id === buyerId)) return;
+    setBuyerId(buyers[0].id ?? "");
+  }, [buyers, buyerId]);
+
   const gross = round2(qty * rate);
   const buyerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "buyer"), [expenseMasters, qty, gross]);
   const growerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "grower"), [expenseMasters, qty, gross]);
@@ -117,6 +139,27 @@ function StockSalePage() {
   const growerNet = round2(gross - growerExpTotal);
 
   const canSave = !!selected && !!buyerId && qty > 0 && rate > 0 && qty <= (selected?.balance ?? 0);
+
+  const saveBuyer = async () => {
+    if (!buyerDraft?.name) return;
+    const id = await db.parties.add({
+      companyId,
+      yearId,
+      type: "buyer",
+      name: buyerDraft.name,
+      shortCode: buyerDraft.shortCode || generateShortCode(buyerDraft.name, "buyer"),
+      mobile: buyerDraft.mobile,
+      village: buyerDraft.village,
+      city: buyerDraft.city,
+      openingBalance: Number(buyerDraft.openingBalance) || 0,
+      openingType: buyerDraft.openingType ?? "Dr",
+      creditLimit: Number(buyerDraft.creditLimit) || undefined,
+      createdAt: Date.now(),
+    });
+    setBuyerId(id as number);
+    setBuyerDraft(null);
+    toast.success("Buyer added");
+  };
 
   const save = async () => {
     if (!selected || !buyerId) return;
@@ -216,9 +259,31 @@ function StockSalePage() {
         <div className="rounded border border-border bg-card p-4">
           <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sale Details</div>
 
+          {selected && (
+            <div className="mb-3 rounded border border-border bg-muted/40 px-3 py-2 text-xs">
+              <div className="font-semibold text-foreground">Selected Lot</div>
+              <div className="mt-1 text-muted-foreground">
+                {selected.challanNo} • {parties.find((x) => x.id === selected.farmerId)?.name ?? "—"} • {items.find((x) => x.id === selected.itemId)?.name ?? "—"} • Balance {fmtQty(selected.balance)}
+              </div>
+            </div>
+          )}
+
           {!selected && (
             <div className="mb-3 flex items-center gap-2 rounded border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700">
               <AlertCircle className="h-3.5 w-3.5" /> Select a stock lot from the list.
+            </div>
+          )}
+
+          {selected && buyers.length === 0 && (
+            <div className="mb-3 rounded border border-border bg-muted/40 px-3 py-3 text-xs">
+              <div className="font-semibold text-foreground">No buyer found</div>
+              <div className="mt-1 text-muted-foreground">Add a buyer first, then save the sale.</div>
+              <button
+                onClick={() => setBuyerDraft({ type: "buyer", openingType: "Dr", openingBalance: 0 })}
+                className="mt-3 inline-flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Buyer
+              </button>
             </div>
           )}
 
@@ -226,10 +291,20 @@ function StockSalePage() {
             <L label="Teep #"><input value={teepNo} onChange={(e) => setTeepNo(e.target.value)} className="inp font-mono" /></L>
             <L label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></L>
             <L label="Buyer" full>
-              <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value) || "")} className="inp">
+              <div className="flex gap-2">
+                <select value={buyerId} onChange={(e) => setBuyerId(Number(e.target.value) || "")} className="inp">
                 <option value="">— Select buyer —</option>
                 {buyers.map((p) => <option key={p.id} value={p.id}>{p.shortCode} · {p.name}</option>)}
-              </select>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => setBuyerDraft({ type: "buyer", openingType: "Dr", openingBalance: 0 })}
+                  className="inline-flex shrink-0 items-center justify-center rounded border border-input px-3 hover:bg-muted"
+                  aria-label="Add buyer"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
             </L>
             <L label={`Qty${selected ? ` (max ${fmtQty(selected.balance)})` : ""}`}>
               <input type="number" value={qty || ""} onChange={(e) => setQty(Number(e.target.value))} className="inp tabular text-right" />
@@ -265,6 +340,15 @@ function StockSalePage() {
           )}
         </div>
       </div>
+      {buyerDraft && (
+        <PartyEditor
+          value={buyerDraft}
+          onChange={(value) => setBuyerDraft(value as typeof buyerDraft)}
+          onSave={saveBuyer}
+          onClose={() => setBuyerDraft(null)}
+          lockType="buyer"
+        />
+      )}
       <style>{`.inp{width:100%;border:1px solid var(--input);background:var(--background);padding:6px 10px;font-size:13px;border-radius:4px}.inp:focus{outline:none;border-color:var(--ring);box-shadow:0 0 0 1px var(--ring)}`}</style>
     </>
   );
