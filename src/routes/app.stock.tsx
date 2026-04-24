@@ -33,7 +33,7 @@ function StockPage() {
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">Showing remaining stock balances grouped by item & quality.</div>
-          <Link to="/app/stock/sale" className="inline-flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90">
+          <Link to="/app/stock/sale" search={{ lot: undefined }} className="inline-flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90">
             <Receipt className="h-3.5 w-3.5" /> Sell Remaining Stock
           </Link>
         </div>
@@ -55,7 +55,7 @@ function StockPage() {
                     <td className={`num tabular font-semibold ${bal > 0 ? "text-credit" : "text-muted-foreground"}`}>{fmtQty(bal)}</td>
                     <td>
                       {bal > 0 && (
-                        <Link to="/app/stock/sale" className="text-xs font-semibold text-primary hover:underline">Sell →</Link>
+                        <Link to="/app/stock/sale" search={{ lot: undefined }} className="text-xs font-semibold text-primary hover:underline">Sell →</Link>
                       )}
                     </td>
                   </tr>
