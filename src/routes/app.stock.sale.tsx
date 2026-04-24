@@ -86,6 +86,11 @@ function StockSalePage() {
     })();
   }, [companyId, yearId, ready]);
 
+  // Auto-select from URL ?lot=
+  useEffect(() => {
+    if (lot && balances.find((b) => b.key === lot)) setSelectedKey(lot);
+  }, [lot, balances]);
+
   // Auto-fill qty when selecting a stock row
   useEffect(() => {
     if (selected) setQty(selected.balance);
