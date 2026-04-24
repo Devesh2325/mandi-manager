@@ -40,26 +40,26 @@ function Dashboard() {
   return (
     <>
       <TopBar title="Dashboard" />
-      <div className="flex-1 overflow-auto p-6 space-y-6">
-        <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-          <KPI icon={Truck} label="Today's Arrivals" value={`${todayChallans.length}`} sub={`${fmtQty(todayQty)} qty`} />
-          <KPI icon={FileText} label="Today's Teeps" value={`${todayTeeps.length}`} sub={`${fmtINR(todaySales)} gross`} />
-          <KPI icon={IndianRupee} label="Net Sale Today" value={fmtINR(todayNet)} sub="after expenses" />
-          <KPI icon={Users} label="Parties" value={`${parties.length}`} sub={`${farmers} farmer · ${buyers} buyer`} />
+      <div id="tour-dashboard" data-tour="dashboard" className="flex-1 overflow-auto p-6 space-y-6">
+        <div id="tour-kpis" data-tour="kpis" className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+          <KPI tourId="tour-kpi-arrivals" icon={Truck} label="Today's Arrivals" value={`${todayChallans.length}`} sub={`${fmtQty(todayQty)} qty`} />
+          <KPI tourId="tour-kpi-teeps" icon={FileText} label="Today's Teeps" value={`${todayTeeps.length}`} sub={`${fmtINR(todaySales)} gross`} />
+          <KPI tourId="tour-kpi-net-sale" icon={IndianRupee} label="Net Sale Today" value={fmtINR(todayNet)} sub="after expenses" />
+          <KPI tourId="tour-kpi-parties" icon={Users} label="Parties" value={`${parties.length}`} sub={`${farmers} farmer · ${buyers} buyer`} />
         </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
-          <div className="pebble lg:col-span-2 p-6 flex flex-col">
+          <div id="tour-recent-challans" data-tour="recent-challans" className="pebble lg:col-span-2 p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-bold">Recent Challans</h2>
-              <Link to="/app/entry/challan" className="text-sm font-semibold text-primary hover:underline">
+              <Link to="/app/entry/challan" id="tour-new-challan-link" data-tour="new-challan-link" className="text-sm font-semibold text-primary hover:underline">
                 + New Challan
               </Link>
             </div>
             {challans.length === 0 ? (
               <Empty msg="No challans yet. Press F2 or click '+ New Challan' to begin." />
             ) : (
-              <table className="grid-table">
+              <table id="tour-recent-challans-table" data-tour="recent-challans-table" className="grid-table">
                 <thead>
                   <tr><th>Date</th><th>Challan #</th><th>Farmer</th><th>Item</th><th className="num">Qty</th><th>Truck</th></tr>
                 </thead>
@@ -79,14 +79,14 @@ function Dashboard() {
             )}
           </div>
 
-          <div className="pebble p-6">
+          <div id="tour-quick-actions" data-tour="quick-actions" className="pebble p-6">
             <h2 className="text-base font-bold mb-4">Quick Actions</h2>
             <div className="flex flex-col gap-1.5">
-              <QuickLink to="/app/entry/challan" icon={Truck} label="New Challan Entry" hint="F2" />
-              <QuickLink to="/app/entry/voucher" icon={IndianRupee} label="Payment / Receipt" hint="F3" />
-              <QuickLink to="/app/masters/parties" icon={Users} label="Add Party" hint="" />
-              <QuickLink to="/app/teep" icon={FileText} label="View Teep Register" hint="" />
-              <QuickLink to="/app/stock" icon={Package} label="Stock Register" hint="" />
+              <QuickLink tourId="tour-qa-challan" to="/app/entry/challan" icon={Truck} label="New Challan Entry" hint="F2" />
+              <QuickLink tourId="tour-qa-voucher" to="/app/entry/voucher" icon={IndianRupee} label="Payment / Receipt" hint="F3" />
+              <QuickLink tourId="tour-qa-party" to="/app/masters/parties" icon={Users} label="Add Party" hint="" />
+              <QuickLink tourId="tour-qa-teep" to="/app/teep" icon={FileText} label="View Teep Register" hint="" />
+              <QuickLink tourId="tour-qa-stock" to="/app/stock" icon={Package} label="Stock Register" hint="" />
             </div>
           </div>
         </div>
@@ -96,10 +96,10 @@ function Dashboard() {
 }
 
 function KPI({
-  icon: Icon, label, value, sub,
-}: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; sub: string }) {
+  icon: Icon, label, value, sub, tourId,
+}: { icon: React.ComponentType<{ className?: string }>; label: string; value: string; sub: string; tourId?: string }) {
   return (
-    <div className="pebble p-6 relative overflow-hidden group">
+    <div id={tourId} data-tour={tourId} className="pebble p-6 relative overflow-hidden group">
       <div className="flex items-center justify-between mb-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-light text-primary">
           <Icon className="h-5 w-5" />
@@ -114,9 +114,9 @@ function KPI({
   );
 }
 
-function QuickLink({ to, icon: Icon, label, hint }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; hint: string }) {
+function QuickLink({ to, icon: Icon, label, hint, tourId }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; hint: string; tourId?: string }) {
   return (
-    <Link to={to} className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
+    <Link to={to} id={tourId} data-tour={tourId} className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
       <span className="flex items-center gap-2.5"><Icon className="h-4 w-4 text-primary" />{label}</span>
       {hint && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">{hint}</span>}
     </Link>
