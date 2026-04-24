@@ -65,13 +65,13 @@ function StockPage() {
             <thead><tr><th>Date</th><th>Challan</th><th>Farmer</th><th>Item</th><th>Quality</th><th className="num">Qty In</th><th className="num">Qty Out</th><th className="num">Balance</th><th></th></tr></thead>
             <tbody>
               {rows.length === 0 && <tr><td colSpan={9} className="py-10 text-center text-muted-foreground">No stock yet. Save a Challan to populate stock.</td></tr>}
-              {rows.map((r) => {
+              {rows.map((r, i) => {
                 const item = items.find((x) => x.id === r.itemId);
                 const q = qualities.find((x) => x.id === r.qualityId);
                 const farmer = parties.find((x) => x.id === r.farmerId);
                 const bal = r.qtyIn - r.qtyOut;
                 return (
-                  <tr key={r.key} className={bal > 0 ? "cursor-pointer hover:bg-muted/50" : undefined}>
+                  <tr key={i}>
                     <td className="tabular">{r.date}</td>
                     <td className="font-mono">{r.challanNo}</td>
                     <td>{farmer?.name ?? "—"}</td>
@@ -79,15 +79,7 @@ function StockPage() {
                     <td>{q?.name ?? "—"}</td>
                     <td className="num tabular">{fmtQty(r.qtyIn)}</td>
                     <td className="num tabular">{fmtQty(r.qtyOut)}</td>
-                    <td className={`num tabular font-semibold ${bal > 0 ? "text-credit" : "text-muted-foreground"}`}>
-                      {bal > 0 ? (
-                        <Link to="/app/stock/sale" search={{ lot: r.key }} className="inline-flex rounded px-1 py-0.5 hover:underline">
-                          {fmtQty(bal)}
-                        </Link>
-                      ) : (
-                        fmtQty(bal)
-                      )}
-                    </td>
+                    <td className={`num tabular font-semibold ${bal > 0 ? "text-credit" : "text-muted-foreground"}`}>{fmtQty(bal)}</td>
                     <td>
                       {bal > 0 && (
                         <Link to="/app/stock/sale" search={{ lot: r.key }} className="text-xs font-semibold text-primary hover:underline">Sell →</Link>
