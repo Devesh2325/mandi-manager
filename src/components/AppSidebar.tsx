@@ -78,9 +78,9 @@ export function AppSidebar() {
   const path = location.pathname;
 
   return (
-    <aside className="flex h-screen w-[260px] shrink-0 flex-col bg-sidebar text-sidebar-foreground p-4 gap-4">
+    <aside id="tour-sidebar" data-tour="sidebar" className="flex h-screen w-[260px] shrink-0 flex-col bg-sidebar text-sidebar-foreground p-4 gap-4">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-2 py-1">
+      <div id="tour-brand" data-tour="brand" className="flex items-center gap-3 px-2 py-1">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-light to-primary text-primary-foreground font-bold shadow-pebble-sm">
           म
         </div>
@@ -97,6 +97,8 @@ export function AppSidebar() {
       {/* Company / FY context */}
       <Link
         to="/select-context"
+        id="tour-context-switcher"
+        data-tour="context-switcher"
         className="pebble-sm block px-4 py-3 hover:shadow-pebble transition-shadow"
       >
         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -110,9 +112,9 @@ export function AppSidebar() {
       </Link>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto -mx-1 px-1">
+      <nav id="tour-nav" data-tour="nav" className="flex-1 overflow-y-auto -mx-1 px-1">
         {groups.map((g) => (
-          <div key={g.label} className="mb-4">
+          <div key={g.label} data-tour-group={g.label.toLowerCase().replace(/\s+/g, "-")} className="mb-4">
             <div className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               {g.label}
             </div>
@@ -121,10 +123,13 @@ export function AppSidebar() {
                 const active =
                   item.to === "/app" ? path === "/app" : path.startsWith(item.to);
                 const Icon = item.icon;
+                const tourId = "tour-nav-" + item.to.replace(/^\//, "").replace(/\//g, "-");
                 return (
                   <Link
                     key={item.to}
                     to={item.to}
+                    id={tourId}
+                    data-tour={tourId}
                     className={cn(
                       "group flex items-center justify-between gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium transition-all",
                       active
@@ -150,7 +155,7 @@ export function AppSidebar() {
       </nav>
 
       {/* User */}
-      <div className="pebble-sm flex items-center justify-between px-3 py-2.5">
+      <div id="tour-user" data-tour="user" className="pebble-sm flex items-center justify-between px-3 py-2.5">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-light text-primary text-xs font-bold">
             {session?.name?.slice(0, 2).toUpperCase() ?? "U"}
@@ -164,6 +169,8 @@ export function AppSidebar() {
         </div>
         <button
           onClick={logout}
+          id="tour-logout"
+          data-tour="logout"
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground"
           title="Logout"
         >
