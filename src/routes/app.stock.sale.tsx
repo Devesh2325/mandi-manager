@@ -11,7 +11,7 @@ import { Save, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/app/stock/sale")({
   component: StockSalePage,
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { lot?: string } => ({
     lot: typeof s.lot === "string" ? s.lot : undefined,
   }),
 });
