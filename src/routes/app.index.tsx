@@ -114,9 +114,9 @@ function KPI({
   );
 }
 
-function QuickLink({ to, icon: Icon, label, hint }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; hint: string }) {
+function QuickLink({ to, icon: Icon, label, hint, tourId }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string; hint: string; tourId?: string }) {
   return (
-    <Link to={to} className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
+    <Link to={to} id={tourId} data-tour={tourId} className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium hover:bg-muted transition-colors">
       <span className="flex items-center gap-2.5"><Icon className="h-4 w-4 text-primary" />{label}</span>
       {hint && <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">{hint}</span>}
     </Link>
