@@ -55,7 +55,7 @@ function StockPage() {
                     <td className={`num tabular font-semibold ${bal > 0 ? "text-credit" : "text-muted-foreground"}`}>{fmtQty(bal)}</td>
                     <td>
                       {bal > 0 && (
-                        <Link to="/app/stock/sale" className="text-xs font-semibold text-primary hover:underline">Sell →</Link>
+                        <Link to="/app/stock/sale" search={{ lot: undefined }} className="text-xs font-semibold text-primary hover:underline">Sell →</Link>
                       )}
                     </td>
                   </tr>
