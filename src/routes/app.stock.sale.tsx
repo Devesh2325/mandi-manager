@@ -86,15 +86,27 @@ function StockSalePage() {
     })();
   }, [companyId, yearId, ready]);
 
-  // Auto-select from URL ?lot=
+  // Auto-select requested lot, otherwise keep the first available lot selected
   useEffect(() => {
-    if (lot && balances.find((b) => b.key === lot)) setSelectedKey(lot);
-  }, [lot, balances]);
+    if (balances.length === 0) {
+      if (selectedKey) setSelectedKey("");
+      return;
+    }
+
+    if (lot && balances.some((b) => b.key === lot)) {
+      if (selectedKey !== lot) setSelectedKey(lot);
+      return;
+    }
+
+    if (!selectedKey || !balances.some((b) => b.key === selectedKey)) {
+      setSelectedKey(balances[0].key);
+    }
+  }, [lot, balances, selectedKey]);
 
   // Auto-fill qty when selecting a stock row
   useEffect(() => {
     if (selected) setQty(selected.balance);
-  }, [selectedKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   const gross = round2(qty * rate);
   const buyerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "buyer"), [expenseMasters, qty, gross]);
