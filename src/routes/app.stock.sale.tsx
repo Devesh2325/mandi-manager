@@ -32,6 +32,7 @@ interface StockBalanceRow {
 function StockSalePage() {
   const { companyId, yearId, ready } = useScope();
   const navigate = useNavigate();
+  const { lot } = Route.useSearch();
 
   const stock = useLiveQuery(async () => (ready ? await db.stockEntries.where({ companyId, yearId }).toArray() : []), [companyId, yearId, ready]) ?? [];
   const challans = useLiveQuery(async () => (ready ? await db.challans.where({ companyId, yearId }).toArray() : []), [companyId, yearId, ready]) ?? [];
