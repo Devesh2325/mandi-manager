@@ -42,12 +42,22 @@ function ChallanEntryPage() {
 
   const [challanNo, setChallanNo] = useState("");
   const [date, setDate] = useState(todayISO());
+  const [saleDate, setSaleDate] = useState(todayISO());
   const [goodsType, setGoodsType] = useState("Vegetable");
   const [farmerId, setFarmerId] = useState<number | "">("");
   const [agentId, setAgentId] = useState<number | "">("");
   const [truckNo, setTruckNo] = useState("");
+  const [trGrNo, setTrGrNo] = useState("");
+  const [sender, setSender] = useState("");
+  const [partyCd, setPartyCd] = useState("");
   const [itemId, setItemId] = useState<number | "">("");
   const [totalQty, setTotalQty] = useState<number>(0);
+  const [fullPacks, setFullPacks] = useState<number>(0);
+  const [halfPacks, setHalfPacks] = useState<number>(0);
+  const [netWt, setNetWt] = useState<number>(0);
+  const [isCashSale, setIsCashSale] = useState(false);
+  const [qtyMatch, setQtyMatch] = useState(true);
+  const [useSaleRate, setUseSaleRate] = useState(false);
   const [notes, setNotes] = useState("");
 
   const [rows, setRows] = useState<QualityRow[]>([
@@ -114,11 +124,27 @@ function ChallanEntryPage() {
     setRows((r) => r.map((row) => (row.id === id ? { ...row, ...patch } : row)));
 
   const addSale = (rowId: string) =>
-    setRows((r) => r.map((row) => row.id === rowId ? { ...row, sales: [...row.sales, { buyerId: 0, qty: 0, rate: 0, amount: 0 }] } : row));
+    setRows((r) => r.map((row) => row.id === rowId ? { ...row, sales: [...row.sales, { buyerId: 0, qty: 0, rate: 0, amount: 0, matrix: {} }] } : row));
   const updateSale = (rowId: string, idx: number, patch: Partial<SaleLine>) =>
     setRows((r) => r.map((row) => {
       if (row.id !== rowId) return row;
       const sales = row.sales.map((s, i) => i === idx ? { ...s, ...patch, amount: round2((patch.qty ?? s.qty) * (patch.rate ?? s.rate)) } : s);
+      return { ...row, sales };
+    }));
+  const updateSaleMatrix = (rowId: string, idx: number, sizeKey: string, field: "qty" | "rate", val: number) =>
+    setRows((r) => r.map((row) => {
+      if (row.id !== rowId) return row;
+      const sales = row.sales.map((s, i) => {
+        if (i !== idx) return s;
+        const m = { ...(s.matrix ?? {}) };
+        const cur = m[sizeKey] ?? { qty: 0, rate: 0 };
+        m[sizeKey] = { ...cur, [field]: val };
+        const entries = Object.values(m);
+        const qty = round2(entries.reduce((a, b) => a + (Number(b.qty) || 0), 0));
+        const amount = round2(entries.reduce((a, b) => a + (Number(b.qty) || 0) * (Number(b.rate) || 0), 0));
+        const rate = qty > 0 ? round2(amount / qty) : s.rate;
+        return { ...s, matrix: m, qty, amount, rate };
+      });
       return { ...row, sales };
     }));
   const delSale = (rowId: string, idx: number) =>
@@ -163,12 +189,22 @@ function ChallanEntryPage() {
       const challan: Challan = {
         companyId, yearId,
         challanNo, date,
+        saleDate: saleDate || undefined,
         goodsType,
         farmerId: Number(farmerId),
         agentId: agentId ? Number(agentId) : undefined,
         truckNo,
+        trGrNo: trGrNo || undefined,
+        sender: sender || undefined,
+        partyCd: partyCd || undefined,
         itemId: Number(itemId),
         totalQty: Number(totalQty) || totals.qty,
+        fullPacks: Number(fullPacks) || undefined,
+        halfPacks: Number(halfPacks) || undefined,
+        netWt: Number(netWt) || undefined,
+        isCashSale: isCashSale || undefined,
+        qtyMatch,
+        useSaleRate,
         qualities: rows,
         expenses,
         notes,
@@ -206,7 +242,7 @@ function ChallanEntryPage() {
           const teep: Teep = {
             companyId, yearId,
             teepNo: `TP-${n.toString().padStart(4, "0")}`,
-            date,
+            date: saleDate || date,
             challanId: challanId as number,
             buyerId: s.buyerId,
             itemId: Number(itemId),
@@ -221,7 +257,7 @@ function ChallanEntryPage() {
 
           // Buyer Dr (gross + buyer expenses)
           ledger.push({
-            companyId, yearId, date,
+            companyId, yearId, date: saleDate || date,
             partyId: s.buyerId,
             refType: "teep", refId: 0,
             narration: `Purchase via ${challan.challanNo}`,
@@ -230,7 +266,7 @@ function ChallanEntryPage() {
           });
           // Grower Cr (gross - grower expenses)
           ledger.push({
-            companyId, yearId, date,
+            companyId, yearId, date: saleDate || date,
             partyId: Number(farmerId),
             refType: "teep", refId: 0,
             narration: `Sale via ${challan.challanNo}`,
@@ -311,16 +347,18 @@ function ChallanEntryPage() {
         {/* Main content */}
         <div className="flex-1 overflow-auto p-4">
           {/* Section A: Arrival */}
-          <Section title="A · Arrival Details">
+          <Section title="A · Arrival / GR Details">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
               <Field label="Challan #"><input value={challanNo} onChange={(e) => setChallanNo(e.target.value)} className="inp font-mono" /></Field>
-              <Field label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
+              <Field label="Arrival Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
+              <Field label="Sale Date (S-DT)"><input type="date" value={saleDate} onChange={(e) => setSaleDate(e.target.value)} className="inp" /></Field>
+              <Field label="Party Cd (cash)"><input value={partyCd} onChange={(e) => setPartyCd(e.target.value.toUpperCase())} className="inp font-mono uppercase" placeholder="—" /></Field>
               <Field label="Goods Type">
                 <select value={goodsType} onChange={(e) => { setGoodsType(e.target.value); setItemId(""); }} className="inp">
                   {goodsTypes.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>
               </Field>
-              <Field label="Farmer (Supplier) *">
+              <Field label="Farmer (Grower) *">
                 <PartyPicker
                   value={farmerId}
                   options={farmers}
@@ -337,15 +375,41 @@ function ChallanEntryPage() {
                 />
               </Field>
               <Field label="Truck No"><input value={truckNo} onChange={(e) => setTruckNo(e.target.value)} className="inp font-mono uppercase" placeholder="HR-55-1234" /></Field>
+              <Field label="TR / GR #"><input value={trGrNo} onChange={(e) => setTrGrNo(e.target.value)} className="inp font-mono" placeholder="89797" /></Field>
+              <Field label="Sender"><input value={sender} onChange={(e) => setSender(e.target.value)} className="inp" placeholder="9898" /></Field>
               <Field label="Item *">
                 <select value={itemId} onChange={(e) => setItemId(Number(e.target.value) || "")} className="inp">
                   <option value="">— Select item —</option>
                   {items.filter((i) => i.goodsType === goodsType).map((i) => <option key={i.id} value={i.id}>{i.name} ({i.unit})</option>)}
                 </select>
               </Field>
-              <Field label="Total Qty (declared)">
-                <input type="number" value={totalQty || ""} onChange={(e) => setTotalQty(Number(e.target.value))} className="inp tabular" placeholder={fmtQty(totals.qty)} />
+              <Field label="Total Qty (TQty)">
+                <input type="number" value={totalQty || ""} onChange={(e) => setTotalQty(Number(e.target.value))} className="inp tabular text-right" placeholder={fmtQty(totals.qty)} />
               </Field>
+              <Field label="Full Packs"><input type="number" value={fullPacks || ""} onChange={(e) => setFullPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
+              <Field label="Half Packs"><input type="number" value={halfPacks || ""} onChange={(e) => setHalfPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
+              <Field label="Net Wt (nwt)"><input type="number" value={netWt || ""} onChange={(e) => setNetWt(Number(e.target.value))} className="inp tabular text-right" /></Field>
+            </div>
+
+            {/* Toggles row */}
+            <div className="mt-3 flex flex-wrap items-center gap-4 rounded border border-border bg-muted/30 px-3 py-2 text-xs">
+              <label className="inline-flex cursor-pointer items-center gap-1.5">
+                <input type="checkbox" checked={isCashSale} onChange={(e) => setIsCashSale(e.target.checked)} className="h-3.5 w-3.5" />
+                <span className="font-semibold uppercase tracking-wider text-destructive">Cash Sale</span>
+              </label>
+              <label className="inline-flex cursor-pointer items-center gap-1.5">
+                <input type="checkbox" checked={qtyMatch} onChange={(e) => setQtyMatch(e.target.checked)} className="h-3.5 w-3.5" />
+                <span>Qty Match (TQty must equal sum of rows)</span>
+              </label>
+              <label className="inline-flex cursor-pointer items-center gap-1.5">
+                <input type="checkbox" checked={useSaleRate} onChange={(e) => setUseSaleRate(e.target.checked)} className="h-3.5 w-3.5" />
+                <span>Use Sale Rate (override matrix rates)</span>
+              </label>
+              {qtyMatch && totalQty > 0 && totalQty !== totals.qty && (
+                <span className="rounded bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                  Mismatch: TQty {fmtQty(totalQty)} vs rows {fmtQty(totals.qty)}
+                </span>
+              )}
             </div>
           </Section>
 
@@ -467,38 +531,98 @@ function ChallanEntryPage() {
                       <Plus className="h-3 w-3" /> Add Buyer
                     </button>
                   </div>
-                  <table className="grid-table">
-                    <thead>
-                      <tr><th>Buyer</th><th className="num">Qty</th><th className="num">Rate</th><th className="num">Amount</th><th className="num">Net (after exp)</th><th></th></tr>
-                    </thead>
-                    <tbody>
-                      {row.sales.length === 0 && (
-                        <tr><td colSpan={6} className="py-3 text-center text-muted-foreground italic">No buyer = full qty goes to stock</td></tr>
-                      )}
-                      {row.sales.map((s, si) => {
-                        const grossLine = s.amount;
-                        const buyerExp = computeExpenses(expenseMasters, s.qty, grossLine, "buyer");
-                        const buyerNet = round2(grossLine + buyerExp.reduce((a, b) => a + b.amount, 0));
-                        return (
-                          <tr key={si}>
-                            <td>
-                              <BuyerPicker
-                                value={s.buyerId}
-                                options={buyers}
-                                onChange={(v) => updateSale(row.id, si, { buyerId: v as number })}
-                                onAdd={() => openPartyAdd("buyer", row.id, si)}
-                              />
-                            </td>
-                            <td><input type="number" className="grid-input text-right" value={s.qty || ""} onChange={(e) => updateSale(row.id, si, { qty: Number(e.target.value) })} /></td>
-                            <td><input type="number" className="grid-input text-right" value={s.rate || ""} onChange={(e) => updateSale(row.id, si, { rate: Number(e.target.value) })} /></td>
-                            <td className="num tabular font-semibold">{fmtINR(grossLine)}</td>
-                            <td className="num tabular text-credit">{fmtINR(buyerNet)}</td>
-                            <td><button onClick={() => delSale(row.id, si)} className="text-destructive"><Trash2 className="h-3 w-3" /></button></td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  {row.sales.length === 0 && (
+                    <div className="py-3 text-center text-xs italic text-muted-foreground">No buyer = full qty goes to stock</div>
+                  )}
+                  {row.sales.map((s, si) => {
+                    const grossLine = s.amount;
+                    const buyerExpLine = computeExpenses(expenseMasters, s.qty, grossLine, "buyer");
+                    const buyerNet = round2(grossLine + buyerExpLine.reduce((a, b) => a + b.amount, 0));
+                    const hasMatrix = Object.values(s.matrix ?? {}).some((c) => (c.qty || 0) > 0 || (c.rate || 0) > 0);
+                    return (
+                      <div key={si} className="mb-2 rounded border border-border bg-background">
+                        {/* Buyer header line */}
+                        <div className="grid grid-cols-12 items-end gap-2 border-b border-border bg-muted/20 p-2">
+                          <div className="col-span-4">
+                            <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buyer</label>
+                            <BuyerPicker
+                              value={s.buyerId}
+                              options={buyers}
+                              onChange={(v) => updateSale(row.id, si, { buyerId: v as number })}
+                              onAdd={() => openPartyAdd("buyer", row.id, si)}
+                            />
+                          </div>
+                          <div className="col-span-1">
+                            <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Qty</label>
+                            <input type="number" disabled={hasMatrix} className="inp tabular text-right disabled:opacity-60" value={s.qty || ""} onChange={(e) => updateSale(row.id, si, { qty: Number(e.target.value) })} />
+                          </div>
+                          <div className="col-span-1">
+                            <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rate</label>
+                            <input type="number" disabled={hasMatrix} className="inp tabular text-right disabled:opacity-60" value={s.rate || ""} onChange={(e) => updateSale(row.id, si, { rate: Number(e.target.value) })} />
+                          </div>
+                          <div className="col-span-2 text-right">
+                            <div className="text-[10px] uppercase text-muted-foreground">Gross</div>
+                            <div className="tabular text-sm font-semibold">{fmtINR(grossLine)}</div>
+                          </div>
+                          <div className="col-span-3 text-right">
+                            <div className="text-[10px] uppercase text-muted-foreground">Net (after buyer exp)</div>
+                            <div className="tabular text-sm font-semibold text-credit">{fmtINR(buyerNet)}</div>
+                          </div>
+                          <div className="col-span-1 flex justify-end">
+                            <button onClick={() => delSale(row.id, si)} className="rounded p-1 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                          </div>
+                        </div>
+
+                        {/* Per-buyer size matrix */}
+                        <div className="p-2">
+                          <div className="mb-1 flex items-center justify-between">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              Buyer Size Matrix {hasMatrix && <span className="ml-1 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary">active — overrides Qty/Rate</span>}
+                            </div>
+                          </div>
+                          <table className="grid-table">
+                            <thead>
+                              <tr>
+                                <th></th>
+                                {sizes.map((sz) => <th key={sz.id} className="num">{sz.name}</th>)}
+                                <th className="num">Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td className="font-medium">Qty</td>
+                                {sizes.map((sz) => (
+                                  <td key={sz.id} className="num">
+                                    <input
+                                      type="number"
+                                      className="grid-input text-right"
+                                      value={s.matrix?.[String(sz.id)]?.qty || ""}
+                                      onChange={(e) => updateSaleMatrix(row.id, si, String(sz.id), "qty", Number(e.target.value))}
+                                    />
+                                  </td>
+                                ))}
+                                <td className="num tabular font-semibold">{fmtQty(s.qty)}</td>
+                              </tr>
+                              <tr>
+                                <td className="font-medium">Rate</td>
+                                {sizes.map((sz) => (
+                                  <td key={sz.id} className="num">
+                                    <input
+                                      type="number"
+                                      className="grid-input text-right"
+                                      value={s.matrix?.[String(sz.id)]?.rate || ""}
+                                      onChange={(e) => updateSaleMatrix(row.id, si, String(sz.id), "rate", Number(e.target.value))}
+                                    />
+                                  </td>
+                                ))}
+                                <td className="num tabular font-semibold text-primary">{fmtINR(s.amount)}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}

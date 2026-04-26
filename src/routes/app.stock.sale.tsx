@@ -109,10 +109,17 @@ function StockSalePage() {
   }, [selected]);
 
   const gross = round2(qty * rate);
-  const buyerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "buyer"), [expenseMasters, qty, gross]);
-  const growerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "grower"), [expenseMasters, qty, gross]);
-  const buyerExpTotal = buyerExp.reduce((a, b) => a + b.amount, 0);
-  const growerExpTotal = growerExp.reduce((a, b) => a + b.amount, 0);
+  const autoBuyerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "buyer"), [expenseMasters, qty, gross]);
+  const autoGrowerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "grower"), [expenseMasters, qty, gross]);
+
+  // Editable copies — re-seed when auto values change (qty/rate/masters)
+  const [buyerExp, setBuyerExp] = useState<AppliedExpense[]>([]);
+  const [growerExp, setGrowerExp] = useState<AppliedExpense[]>([]);
+  useEffect(() => { setBuyerExp(autoBuyerExp); }, [autoBuyerExp]);
+  useEffect(() => { setGrowerExp(autoGrowerExp); }, [autoGrowerExp]);
+
+  const buyerExpTotal = buyerExp.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+  const growerExpTotal = growerExp.reduce((a, b) => a + (Number(b.amount) || 0), 0);
   const buyerNet = round2(gross + buyerExpTotal);
   const growerNet = round2(gross - growerExpTotal);
 
@@ -237,7 +244,61 @@ function StockSalePage() {
             <L label="Rate"><input type="number" value={rate || ""} onChange={(e) => setRate(Number(e.target.value))} className="inp tabular text-right" /></L>
           </div>
 
-          <div className="mt-4 space-y-1 rounded bg-muted/40 p-3 text-xs">
+          {/* Editable expenses */}
+          <div className="mt-4 rounded border border-border bg-muted/30 p-3 text-xs">
+            <div className="mb-2 flex items-center justify-between">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Expenses (editable)</div>
+              <button
+                type="button"
+                onClick={() => { setBuyerExp(autoBuyerExp); setGrowerExp(autoGrowerExp); }}
+                className="rounded border border-input bg-background px-2 py-0.5 text-[10px] hover:bg-muted"
+                title="Recompute from masters"
+              >
+                Reset
+              </button>
+            </div>
+
+            {(buyerExp.length > 0 || growerExp.length > 0) ? (
+              <div className="space-y-2">
+                {buyerExp.length > 0 && (
+                  <div>
+                    <div className="mb-1 text-[10px] uppercase text-muted-foreground">Buyer-side (+)</div>
+                    {buyerExp.map((e, i) => (
+                      <div key={`b${i}`} className="mb-1 flex items-center gap-2">
+                        <span className="flex-1 truncate">{e.name}</span>
+                        <input
+                          type="number"
+                          value={e.amount || ""}
+                          onChange={(ev) => setBuyerExp((arr) => arr.map((x, idx) => idx === i ? { ...x, amount: Number(ev.target.value) || 0, source: "manual" } : x))}
+                          className="w-24 rounded border border-input bg-background px-2 py-1 text-right text-xs tabular-nums"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {growerExp.length > 0 && (
+                  <div>
+                    <div className="mb-1 text-[10px] uppercase text-muted-foreground">Grower-side (−)</div>
+                    {growerExp.map((e, i) => (
+                      <div key={`g${i}`} className="mb-1 flex items-center gap-2">
+                        <span className="flex-1 truncate">{e.name}</span>
+                        <input
+                          type="number"
+                          value={e.amount || ""}
+                          onChange={(ev) => setGrowerExp((arr) => arr.map((x, idx) => idx === i ? { ...x, amount: Number(ev.target.value) || 0, source: "manual" } : x))}
+                          className="w-24 rounded border border-input bg-background px-2 py-1 text-right text-xs tabular-nums"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-[11px] italic text-muted-foreground">No expense masters configured.</div>
+            )}
+          </div>
+
+          <div className="mt-3 space-y-1 rounded bg-muted/40 p-3 text-xs">
             <Row k="Gross" v={fmtINR(gross)} />
             <Row k="Buyer Expenses (+)" v={fmtINR(buyerExpTotal)} muted />
             <Row k="Grower Expenses (−)" v={fmtINR(growerExpTotal)} muted />
