@@ -42,12 +42,22 @@ function ChallanEntryPage() {
 
   const [challanNo, setChallanNo] = useState("");
   const [date, setDate] = useState(todayISO());
+  const [saleDate, setSaleDate] = useState(todayISO());
   const [goodsType, setGoodsType] = useState("Vegetable");
   const [farmerId, setFarmerId] = useState<number | "">("");
   const [agentId, setAgentId] = useState<number | "">("");
   const [truckNo, setTruckNo] = useState("");
+  const [trGrNo, setTrGrNo] = useState("");
+  const [sender, setSender] = useState("");
+  const [partyCd, setPartyCd] = useState("");
   const [itemId, setItemId] = useState<number | "">("");
   const [totalQty, setTotalQty] = useState<number>(0);
+  const [fullPacks, setFullPacks] = useState<number>(0);
+  const [halfPacks, setHalfPacks] = useState<number>(0);
+  const [netWt, setNetWt] = useState<number>(0);
+  const [isCashSale, setIsCashSale] = useState(false);
+  const [qtyMatch, setQtyMatch] = useState(true);
+  const [useSaleRate, setUseSaleRate] = useState(false);
   const [notes, setNotes] = useState("");
 
   const [rows, setRows] = useState<QualityRow[]>([
