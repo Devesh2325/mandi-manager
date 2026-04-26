@@ -6,7 +6,7 @@ import { TopBar } from "@/components/TopBar";
 import { fmtQty } from "@/lib/format";
 import { Receipt } from "lucide-react";
 
-export const Route = createFileRoute("/app/stock")({
+export const Route = createFileRoute("/app/stock/")({
   component: StockPage,
 });
 
