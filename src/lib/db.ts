@@ -108,6 +108,8 @@ export interface SaleLine {
   qty: number;
   rate: number;
   amount: number;
+  /** Optional per-buyer sub-packing matrix: sizeId -> {qty, rate} */
+  matrix?: Record<string, { qty: number; rate: number }>;
 }
 
 export interface QualityRow {
@@ -137,13 +139,23 @@ export interface Challan {
   companyId: number;
   yearId: number;
   challanNo: string;
-  date: string; // ISO date
+  date: string; // ISO date — Arrival date
+  saleDate?: string; // S-DT — sale (teep) date if different
   goodsType: string;
   farmerId: number;
   agentId?: number;
   truckNo?: string;
+  trGrNo?: string; // TR/GR # — transport receipt / GR number
+  sender?: string; // SENDER — dispatching party / station
+  partyCd?: string; // Party Cd — quick cash-party code
   itemId: number;
   totalQty: number;
+  fullPacks?: number; // Full packs
+  halfPacks?: number; // Half packs
+  netWt?: number; // nwt — net weight
+  isCashSale?: boolean; // CASH SALE flag
+  qtyMatch?: boolean; // Qty Match toggle
+  useSaleRate?: boolean; // Sale Rate toggle
   qualities: QualityRow[];
   expenses: AppliedExpense[];
   notes?: string;
