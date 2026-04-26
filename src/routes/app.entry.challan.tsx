@@ -331,16 +331,18 @@ function ChallanEntryPage() {
         {/* Main content */}
         <div className="flex-1 overflow-auto p-4">
           {/* Section A: Arrival */}
-          <Section title="A · Arrival Details">
+          <Section title="A · Arrival / GR Details">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
               <Field label="Challan #"><input value={challanNo} onChange={(e) => setChallanNo(e.target.value)} className="inp font-mono" /></Field>
-              <Field label="Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
+              <Field label="Arrival Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
+              <Field label="Sale Date (S-DT)"><input type="date" value={saleDate} onChange={(e) => setSaleDate(e.target.value)} className="inp" /></Field>
+              <Field label="Party Cd (cash)"><input value={partyCd} onChange={(e) => setPartyCd(e.target.value.toUpperCase())} className="inp font-mono uppercase" placeholder="—" /></Field>
               <Field label="Goods Type">
                 <select value={goodsType} onChange={(e) => { setGoodsType(e.target.value); setItemId(""); }} className="inp">
                   {goodsTypes.map((g) => <option key={g} value={g}>{g}</option>)}
                 </select>
               </Field>
-              <Field label="Farmer (Supplier) *">
+              <Field label="Farmer (Grower) *">
                 <PartyPicker
                   value={farmerId}
                   options={farmers}
@@ -357,15 +359,41 @@ function ChallanEntryPage() {
                 />
               </Field>
               <Field label="Truck No"><input value={truckNo} onChange={(e) => setTruckNo(e.target.value)} className="inp font-mono uppercase" placeholder="HR-55-1234" /></Field>
+              <Field label="TR / GR #"><input value={trGrNo} onChange={(e) => setTrGrNo(e.target.value)} className="inp font-mono" placeholder="89797" /></Field>
+              <Field label="Sender"><input value={sender} onChange={(e) => setSender(e.target.value)} className="inp" placeholder="9898" /></Field>
               <Field label="Item *">
                 <select value={itemId} onChange={(e) => setItemId(Number(e.target.value) || "")} className="inp">
                   <option value="">— Select item —</option>
                   {items.filter((i) => i.goodsType === goodsType).map((i) => <option key={i.id} value={i.id}>{i.name} ({i.unit})</option>)}
                 </select>
               </Field>
-              <Field label="Total Qty (declared)">
-                <input type="number" value={totalQty || ""} onChange={(e) => setTotalQty(Number(e.target.value))} className="inp tabular" placeholder={fmtQty(totals.qty)} />
+              <Field label="Total Qty (TQty)">
+                <input type="number" value={totalQty || ""} onChange={(e) => setTotalQty(Number(e.target.value))} className="inp tabular text-right" placeholder={fmtQty(totals.qty)} />
               </Field>
+              <Field label="Full Packs"><input type="number" value={fullPacks || ""} onChange={(e) => setFullPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
+              <Field label="Half Packs"><input type="number" value={halfPacks || ""} onChange={(e) => setHalfPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
+              <Field label="Net Wt (nwt)"><input type="number" value={netWt || ""} onChange={(e) => setNetWt(Number(e.target.value))} className="inp tabular text-right" /></Field>
+            </div>
+
+            {/* Toggles row */}
+            <div className="mt-3 flex flex-wrap items-center gap-4 rounded border border-border bg-muted/30 px-3 py-2 text-xs">
+              <label className="inline-flex cursor-pointer items-center gap-1.5">
+                <input type="checkbox" checked={isCashSale} onChange={(e) => setIsCashSale(e.target.checked)} className="h-3.5 w-3.5" />
+                <span className="font-semibold uppercase tracking-wider text-destructive">Cash Sale</span>
+              </label>
+              <label className="inline-flex cursor-pointer items-center gap-1.5">
+                <input type="checkbox" checked={qtyMatch} onChange={(e) => setQtyMatch(e.target.checked)} className="h-3.5 w-3.5" />
+                <span>Qty Match (TQty must equal sum of rows)</span>
+              </label>
+              <label className="inline-flex cursor-pointer items-center gap-1.5">
+                <input type="checkbox" checked={useSaleRate} onChange={(e) => setUseSaleRate(e.target.checked)} className="h-3.5 w-3.5" />
+                <span>Use Sale Rate (override matrix rates)</span>
+              </label>
+              {qtyMatch && totalQty > 0 && totalQty !== totals.qty && (
+                <span className="rounded bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                  Mismatch: TQty {fmtQty(totalQty)} vs rows {fmtQty(totals.qty)}
+                </span>
+              )}
             </div>
           </Section>
 
