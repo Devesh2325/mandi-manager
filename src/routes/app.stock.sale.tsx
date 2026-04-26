@@ -109,10 +109,17 @@ function StockSalePage() {
   }, [selected]);
 
   const gross = round2(qty * rate);
-  const buyerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "buyer"), [expenseMasters, qty, gross]);
-  const growerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "grower"), [expenseMasters, qty, gross]);
-  const buyerExpTotal = buyerExp.reduce((a, b) => a + b.amount, 0);
-  const growerExpTotal = growerExp.reduce((a, b) => a + b.amount, 0);
+  const autoBuyerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "buyer"), [expenseMasters, qty, gross]);
+  const autoGrowerExp = useMemo(() => computeExpenses(expenseMasters, qty, gross, "grower"), [expenseMasters, qty, gross]);
+
+  // Editable copies — re-seed when auto values change (qty/rate/masters)
+  const [buyerExp, setBuyerExp] = useState<AppliedExpense[]>([]);
+  const [growerExp, setGrowerExp] = useState<AppliedExpense[]>([]);
+  useEffect(() => { setBuyerExp(autoBuyerExp); }, [autoBuyerExp]);
+  useEffect(() => { setGrowerExp(autoGrowerExp); }, [autoGrowerExp]);
+
+  const buyerExpTotal = buyerExp.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+  const growerExpTotal = growerExp.reduce((a, b) => a + (Number(b.amount) || 0), 0);
   const buyerNet = round2(gross + buyerExpTotal);
   const growerNet = round2(gross - growerExpTotal);
 
