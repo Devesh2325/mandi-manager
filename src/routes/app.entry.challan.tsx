@@ -124,11 +124,27 @@ function ChallanEntryPage() {
     setRows((r) => r.map((row) => (row.id === id ? { ...row, ...patch } : row)));
 
   const addSale = (rowId: string) =>
-    setRows((r) => r.map((row) => row.id === rowId ? { ...row, sales: [...row.sales, { buyerId: 0, qty: 0, rate: 0, amount: 0 }] } : row));
+    setRows((r) => r.map((row) => row.id === rowId ? { ...row, sales: [...row.sales, { buyerId: 0, qty: 0, rate: 0, amount: 0, matrix: {} }] } : row));
   const updateSale = (rowId: string, idx: number, patch: Partial<SaleLine>) =>
     setRows((r) => r.map((row) => {
       if (row.id !== rowId) return row;
       const sales = row.sales.map((s, i) => i === idx ? { ...s, ...patch, amount: round2((patch.qty ?? s.qty) * (patch.rate ?? s.rate)) } : s);
+      return { ...row, sales };
+    }));
+  const updateSaleMatrix = (rowId: string, idx: number, sizeKey: string, field: "qty" | "rate", val: number) =>
+    setRows((r) => r.map((row) => {
+      if (row.id !== rowId) return row;
+      const sales = row.sales.map((s, i) => {
+        if (i !== idx) return s;
+        const m = { ...(s.matrix ?? {}) };
+        const cur = m[sizeKey] ?? { qty: 0, rate: 0 };
+        m[sizeKey] = { ...cur, [field]: val };
+        const entries = Object.values(m);
+        const qty = round2(entries.reduce((a, b) => a + (Number(b.qty) || 0), 0));
+        const amount = round2(entries.reduce((a, b) => a + (Number(b.qty) || 0) * (Number(b.rate) || 0), 0));
+        const rate = qty > 0 ? round2(amount / qty) : s.rate;
+        return { ...s, matrix: m, qty, amount, rate };
+      });
       return { ...row, sales };
     }));
   const delSale = (rowId: string, idx: number) =>
