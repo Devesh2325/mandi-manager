@@ -226,7 +226,7 @@ function ChallanEntryPage() {
           const teep: Teep = {
             companyId, yearId,
             teepNo: `TP-${n.toString().padStart(4, "0")}`,
-            date,
+            date: saleDate || date,
             challanId: challanId as number,
             buyerId: s.buyerId,
             itemId: Number(itemId),
@@ -241,7 +241,7 @@ function ChallanEntryPage() {
 
           // Buyer Dr (gross + buyer expenses)
           ledger.push({
-            companyId, yearId, date,
+            companyId, yearId, date: saleDate || date,
             partyId: s.buyerId,
             refType: "teep", refId: 0,
             narration: `Purchase via ${challan.challanNo}`,
@@ -250,7 +250,7 @@ function ChallanEntryPage() {
           });
           // Grower Cr (gross - grower expenses)
           ledger.push({
-            companyId, yearId, date,
+            companyId, yearId, date: saleDate || date,
             partyId: Number(farmerId),
             refType: "teep", refId: 0,
             narration: `Sale via ${challan.challanNo}`,
