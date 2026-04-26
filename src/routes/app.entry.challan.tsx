@@ -531,38 +531,98 @@ function ChallanEntryPage() {
                       <Plus className="h-3 w-3" /> Add Buyer
                     </button>
                   </div>
-                  <table className="grid-table">
-                    <thead>
-                      <tr><th>Buyer</th><th className="num">Qty</th><th className="num">Rate</th><th className="num">Amount</th><th className="num">Net (after exp)</th><th></th></tr>
-                    </thead>
-                    <tbody>
-                      {row.sales.length === 0 && (
-                        <tr><td colSpan={6} className="py-3 text-center text-muted-foreground italic">No buyer = full qty goes to stock</td></tr>
-                      )}
-                      {row.sales.map((s, si) => {
-                        const grossLine = s.amount;
-                        const buyerExp = computeExpenses(expenseMasters, s.qty, grossLine, "buyer");
-                        const buyerNet = round2(grossLine + buyerExp.reduce((a, b) => a + b.amount, 0));
-                        return (
-                          <tr key={si}>
-                            <td>
-                              <BuyerPicker
-                                value={s.buyerId}
-                                options={buyers}
-                                onChange={(v) => updateSale(row.id, si, { buyerId: v as number })}
-                                onAdd={() => openPartyAdd("buyer", row.id, si)}
-                              />
-                            </td>
-                            <td><input type="number" className="grid-input text-right" value={s.qty || ""} onChange={(e) => updateSale(row.id, si, { qty: Number(e.target.value) })} /></td>
-                            <td><input type="number" className="grid-input text-right" value={s.rate || ""} onChange={(e) => updateSale(row.id, si, { rate: Number(e.target.value) })} /></td>
-                            <td className="num tabular font-semibold">{fmtINR(grossLine)}</td>
-                            <td className="num tabular text-credit">{fmtINR(buyerNet)}</td>
-                            <td><button onClick={() => delSale(row.id, si)} className="text-destructive"><Trash2 className="h-3 w-3" /></button></td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  {row.sales.length === 0 && (
+                    <div className="py-3 text-center text-xs italic text-muted-foreground">No buyer = full qty goes to stock</div>
+                  )}
+                  {row.sales.map((s, si) => {
+                    const grossLine = s.amount;
+                    const buyerExpLine = computeExpenses(expenseMasters, s.qty, grossLine, "buyer");
+                    const buyerNet = round2(grossLine + buyerExpLine.reduce((a, b) => a + b.amount, 0));
+                    const hasMatrix = Object.values(s.matrix ?? {}).some((c) => (c.qty || 0) > 0 || (c.rate || 0) > 0);
+                    return (
+                      <div key={si} className="mb-2 rounded border border-border bg-background">
+                        {/* Buyer header line */}
+                        <div className="grid grid-cols-12 items-end gap-2 border-b border-border bg-muted/20 p-2">
+                          <div className="col-span-4">
+                            <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buyer</label>
+                            <BuyerPicker
+                              value={s.buyerId}
+                              options={buyers}
+                              onChange={(v) => updateSale(row.id, si, { buyerId: v as number })}
+                              onAdd={() => openPartyAdd("buyer", row.id, si)}
+                            />
+                          </div>
+                          <div className="col-span-1">
+                            <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Qty</label>
+                            <input type="number" disabled={hasMatrix} className="inp tabular text-right disabled:opacity-60" value={s.qty || ""} onChange={(e) => updateSale(row.id, si, { qty: Number(e.target.value) })} />
+                          </div>
+                          <div className="col-span-1">
+                            <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rate</label>
+                            <input type="number" disabled={hasMatrix} className="inp tabular text-right disabled:opacity-60" value={s.rate || ""} onChange={(e) => updateSale(row.id, si, { rate: Number(e.target.value) })} />
+                          </div>
+                          <div className="col-span-2 text-right">
+                            <div className="text-[10px] uppercase text-muted-foreground">Gross</div>
+                            <div className="tabular text-sm font-semibold">{fmtINR(grossLine)}</div>
+                          </div>
+                          <div className="col-span-3 text-right">
+                            <div className="text-[10px] uppercase text-muted-foreground">Net (after buyer exp)</div>
+                            <div className="tabular text-sm font-semibold text-credit">{fmtINR(buyerNet)}</div>
+                          </div>
+                          <div className="col-span-1 flex justify-end">
+                            <button onClick={() => delSale(row.id, si)} className="rounded p-1 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                          </div>
+                        </div>
+
+                        {/* Per-buyer size matrix */}
+                        <div className="p-2">
+                          <div className="mb-1 flex items-center justify-between">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              Buyer Size Matrix {hasMatrix && <span className="ml-1 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary">active — overrides Qty/Rate</span>}
+                            </div>
+                          </div>
+                          <table className="grid-table">
+                            <thead>
+                              <tr>
+                                <th></th>
+                                {sizes.map((sz) => <th key={sz.id} className="num">{sz.name}</th>)}
+                                <th className="num">Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <td className="font-medium">Qty</td>
+                                {sizes.map((sz) => (
+                                  <td key={sz.id} className="num">
+                                    <input
+                                      type="number"
+                                      className="grid-input text-right"
+                                      value={s.matrix?.[String(sz.id)]?.qty || ""}
+                                      onChange={(e) => updateSaleMatrix(row.id, si, String(sz.id), "qty", Number(e.target.value))}
+                                    />
+                                  </td>
+                                ))}
+                                <td className="num tabular font-semibold">{fmtQty(s.qty)}</td>
+                              </tr>
+                              <tr>
+                                <td className="font-medium">Rate</td>
+                                {sizes.map((sz) => (
+                                  <td key={sz.id} className="num">
+                                    <input
+                                      type="number"
+                                      className="grid-input text-right"
+                                      value={s.matrix?.[String(sz.id)]?.rate || ""}
+                                      onChange={(e) => updateSaleMatrix(row.id, si, String(sz.id), "rate", Number(e.target.value))}
+                                    />
+                                  </td>
+                                ))}
+                                <td className="num tabular font-semibold text-primary">{fmtINR(s.amount)}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}
