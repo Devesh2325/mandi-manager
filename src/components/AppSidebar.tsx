@@ -122,13 +122,16 @@ export function AppSidebar() {
 
       {/* Nav */}
       <nav id="tour-nav" data-tour="nav" className="flex-1 overflow-y-auto -mx-1 px-1">
-        {groups.map((g) => (
+        {groups.map((g) => {
+          const visibleItems = g.items.filter((i) => !i.requires || can(session?.role, i.requires));
+          if (visibleItems.length === 0) return null;
+          return (
           <div key={g.label} data-tour-group={g.label.toLowerCase().replace(/\s+/g, "-")} className="mb-4">
             <div className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               {g.label}
             </div>
             <div className="flex flex-col gap-1">
-              {g.items.map((item) => {
+              {visibleItems.map((item) => {
                 const active =
                   item.to === "/app" ? path === "/app" : path.startsWith(item.to);
                 const Icon = item.icon;
