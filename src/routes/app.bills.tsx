@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
+import { PdfActions } from "@/components/PdfActions";
 import { fmtINR, fmtQty } from "@/lib/format";
 import { FileText, Printer } from "lucide-react";
 
@@ -34,10 +35,41 @@ function BillsPage() {
     farmerGroups.set(ch.farmerId, arr);
   });
 
+  const buyerPdfRows = Array.from(buyerGroups.entries()).map(([bid, list]) => {
+    const p = parties.find((x) => x.id === bid);
+    const qty = list.reduce((a, b) => a + b.qty, 0);
+    const gross = list.reduce((a, b) => a + b.gross, 0);
+    return [p?.name ?? "—", String(list.length), fmtQty(qty), fmtINR(gross)];
+  });
+  const farmerPdfRows = Array.from(farmerGroups.entries()).map(([fid, list]) => {
+    const p = parties.find((x) => x.id === fid);
+    const qty = list.reduce((a, b) => a + b.qty, 0);
+    const net = list.reduce((a, b) => a + b.net, 0);
+    return [p?.name ?? "—", String(list.length), fmtQty(qty), fmtINR(net)];
+  });
+
   return (
     <>
-      <TopBar title="Bills" />
+      <TopBar
+        title="Bills"
+        right={
+          <PdfActions
+            title="Bills Summary"
+            filename="bills-summary"
+            subtitle="Buyer purcha + Grower sale bills"
+            columns={[{ header: "Party" }, { header: "Lines", num: true }, { header: "Qty", num: true }, { header: "Amount", num: true }]}
+            rows={[
+              ["— BUYERS —", "", "", ""],
+              ...buyerPdfRows,
+              ["— GROWERS —", "", "", ""],
+              ...farmerPdfRows,
+            ]}
+          />
+        }
+      />
       <div className="grid gap-4 p-4 lg:grid-cols-2">
+        {/* Suppress unused import warning */}
+        <span className="hidden"><FileText /><Printer /></span>
         <div className="rounded border border-border bg-card">
           <div className="border-b border-border px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Buyer Purcha (Bills)</div>
           <table className="grid-table">

@@ -7,6 +7,16 @@ export interface Company {
   shortCode: string;
   address?: string;
   gstin?: string;
+  /** APMC license / mandi shop license no. */
+  apmcLicense?: string;
+  mobile?: string;
+  altMobile?: string;
+  email?: string;
+  website?: string;
+  /** Logo as data-URL (base64 PNG/JPEG) — embedded so PDFs work fully offline. */
+  logoDataUrl?: string;
+  /** Optional invoice/bill footer text (terms, signature line). */
+  billFooter?: string;
   createdAt: number;
 }
 
@@ -18,12 +28,18 @@ export interface FinancialYear {
   endDate: string; // ISO
 }
 
+export type AppRole = "admin" | "operator" | "accountant" | "viewer";
+
 export interface User {
   id?: number;
   username: string;
   password: string; // mock only
   name: string;
-  role: "admin" | "operator" | "viewer";
+  role: AppRole;
+  email?: string;
+  mobile?: string;
+  active?: boolean;
+  invitedAt?: number;
 }
 
 // ===== Masters =====
@@ -260,10 +276,40 @@ class MandiDB extends Dexie {
       ledger: "++id, [companyId+yearId], partyId, date, refType",
       vouchers: "++id, [companyId+yearId], voucherNo, date, partyId, type",
     });
+    // v2: extended company branding + accountant role + user invite fields.
+    // No index changes needed; Dexie auto-migrates added optional columns.
+    this.version(2).stores({});
   }
 }
 
 export const db = new MandiDB();
+
+// ============ Permissions ============
+/**
+ * Permissions matrix per role.
+ * - admin       → everything (settings, users, masters, entries, reports)
+ * - operator    → entries (challan/voucher), stock sale, view masters & reports
+ * - accountant  → ledger/cashbook/trial-balance write, vouchers, reports — no settings/users
+ * - viewer      → read-only across reports & ledgers
+ */
+export const ROLE_PERMS: Record<AppRole, {
+  settings: boolean;
+  manageUsers: boolean;
+  manageMasters: boolean;
+  entry: boolean;     // challan, stock sale
+  voucher: boolean;
+  reports: boolean;
+}> = {
+  admin:      { settings: true,  manageUsers: true,  manageMasters: true,  entry: true,  voucher: true,  reports: true },
+  operator:   { settings: false, manageUsers: false, manageMasters: false, entry: true,  voucher: true,  reports: true },
+  accountant: { settings: false, manageUsers: false, manageMasters: false, entry: false, voucher: true,  reports: true },
+  viewer:     { settings: false, manageUsers: false, manageMasters: false, entry: false, voucher: false, reports: true },
+};
+
+export function can(role: AppRole | undefined, perm: keyof typeof ROLE_PERMS["admin"]): boolean {
+  if (!role) return false;
+  return ROLE_PERMS[role]?.[perm] ?? false;
+}
 
 // ============ Seed ============
 export async function seedIfEmpty() {

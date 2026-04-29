@@ -4,6 +4,7 @@ import { useState } from "react";
 import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
+import { PdfActions } from "@/components/PdfActions";
 import { fmtINR } from "@/lib/format";
 
 export const Route = createFileRoute("/app/ledger")({
@@ -25,9 +26,42 @@ function LedgerPage() {
   const totals = filtered.reduce((a, l) => ({ dr: a.dr + l.debit, cr: a.cr + l.credit }), { dr: 0, cr: 0 });
   const closing = opening + totals.dr - totals.cr;
 
+  let prDr = 0, prCr = 0;
+  const pdfRows = filtered.map((l) => {
+    prDr += l.debit; prCr += l.credit;
+    const bal = opening + prDr - prCr;
+    return [
+      l.date,
+      parties.find((p) => p.id === l.partyId)?.name ?? "—",
+      l.narration,
+      l.refType.toUpperCase(),
+      l.debit ? fmtINR(l.debit) : "—",
+      l.credit ? fmtINR(l.credit) : "—",
+      `${fmtINR(Math.abs(bal))} ${bal >= 0 ? "Dr" : "Cr"}`,
+    ];
+  });
+
+  const partyName = partyId ? parties.find((p) => p.id === partyId)?.name : "All parties";
+
   return (
     <>
-      <TopBar title="Ledger" />
+      <TopBar
+        title="Ledger"
+        right={
+          <PdfActions
+            title="Ledger"
+            filename={`ledger-${partyName ?? "all"}`}
+            subtitle={`${partyName} · Opening ${fmtINR(Math.abs(opening))} ${opening >= 0 ? "Dr" : "Cr"} · Closing ${fmtINR(Math.abs(closing))} ${closing >= 0 ? "Dr" : "Cr"}`}
+            orientation="l"
+            columns={[
+              { header: "Date" }, { header: "Party" }, { header: "Narration" }, { header: "Ref" },
+              { header: "Debit", num: true }, { header: "Credit", num: true }, { header: "Balance", num: true },
+            ]}
+            rows={pdfRows}
+            footer={["", "", "", "Totals", fmtINR(totals.dr), fmtINR(totals.cr), ""]}
+          />
+        }
+      />
       <div className="p-4">
         <div className="mb-3 flex items-center gap-2">
           <select value={partyId} onChange={(e) => setPartyId(Number(e.target.value) || "")} className="rounded border border-input bg-background px-2 py-1 text-xs">

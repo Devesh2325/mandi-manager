@@ -1,11 +1,13 @@
 // Mock session — frontend prototype only
+import type { AppRole } from "./db";
+
 const SESSION_KEY = "mandi.session.v1";
 
 export interface Session {
   userId: number;
   username: string;
   name: string;
-  role: "admin" | "operator" | "viewer";
+  role: AppRole;
   companyId?: number;
   yearId?: number;
 }

@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppTrialBalanceRouteImport } from './routes/app.trial-balance'
 import { Route as AppTeepRouteImport } from './routes/app.teep'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppReportsRouteImport } from './routes/app.reports'
 import { Route as AppMastersRouteImport } from './routes/app.masters'
 import { Route as AppLedgerRouteImport } from './routes/app.ledger'
@@ -64,6 +65,11 @@ const AppTrialBalanceRoute = AppTrialBalanceRouteImport.update({
 const AppTeepRoute = AppTeepRouteImport.update({
   id: '/teep',
   path: '/teep',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppReportsRoute = AppReportsRouteImport.update({
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app/reports': typeof AppReportsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
   '/app/': typeof AppIndexRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app/reports': typeof AppReportsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
   '/app': typeof AppIndexRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
   '/app/reports': typeof AppReportsRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
   '/app/': typeof AppIndexRoute
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/app/ledger'
     | '/app/masters'
     | '/app/reports'
+    | '/app/settings'
     | '/app/teep'
     | '/app/trial-balance'
     | '/app/'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/app/ledger'
     | '/app/masters'
     | '/app/reports'
+    | '/app/settings'
     | '/app/teep'
     | '/app/trial-balance'
     | '/app'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/app/ledger'
     | '/app/masters'
     | '/app/reports'
+    | '/app/settings'
     | '/app/teep'
     | '/app/trial-balance'
     | '/app/'
@@ -333,6 +345,13 @@ declare module '@tanstack/react-router' {
       path: '/teep'
       fullPath: '/app/teep'
       preLoaderRoute: typeof AppTeepRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/reports': {
@@ -475,6 +494,7 @@ interface AppRouteChildren {
   AppLedgerRoute: typeof AppLedgerRoute
   AppMastersRoute: typeof AppMastersRouteWithChildren
   AppReportsRoute: typeof AppReportsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
   AppTeepRoute: typeof AppTeepRoute
   AppTrialBalanceRoute: typeof AppTrialBalanceRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -489,6 +509,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLedgerRoute: AppLedgerRoute,
   AppMastersRoute: AppMastersRouteWithChildren,
   AppReportsRoute: AppReportsRoute,
+  AppSettingsRoute: AppSettingsRoute,
   AppTeepRoute: AppTeepRoute,
   AppTrialBalanceRoute: AppTrialBalanceRoute,
   AppIndexRoute: AppIndexRoute,
@@ -507,12 +528,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

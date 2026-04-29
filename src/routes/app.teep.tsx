@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
+import { PdfActions } from "@/components/PdfActions";
 import { fmtINR, fmtQty } from "@/lib/format";
 
 export const Route = createFileRoute("/app/teep")({
@@ -18,9 +19,42 @@ function TeepPage() {
 
   const totals = teeps.reduce((acc, t) => ({ qty: acc.qty + t.qty, gross: acc.gross + t.gross, net: acc.net + t.net }), { qty: 0, gross: 0, net: 0 });
 
+  const pdfRows = teeps.slice().reverse().map((t) => {
+    const exp = t.expenses.reduce((a, b) => a + b.amount, 0);
+    return [
+      t.date,
+      t.teepNo,
+      parties.find((p) => p.id === t.buyerId)?.name ?? "—",
+      items.find((i) => i.id === t.itemId)?.name ?? "—",
+      qualities.find((q) => q.id === t.qualityId)?.name ?? "—",
+      fmtQty(t.qty),
+      fmtINR(t.rate),
+      fmtINR(t.gross),
+      fmtINR(exp),
+      fmtINR(t.net),
+    ];
+  });
+
   return (
     <>
-      <TopBar title="Teep — Sale Register" />
+      <TopBar
+        title="Teep — Sale Register"
+        right={
+          <PdfActions
+            title="Teep — Sale Register"
+            filename="teep-sale-register"
+            orientation="l"
+            columns={[
+              { header: "Date" }, { header: "Teep #" }, { header: "Buyer" },
+              { header: "Item" }, { header: "Quality" },
+              { header: "Qty", num: true }, { header: "Rate", num: true },
+              { header: "Gross", num: true }, { header: "Expense", num: true }, { header: "Net", num: true },
+            ]}
+            rows={pdfRows}
+            footer={["", "", "", "", "Totals", fmtQty(totals.qty), "", fmtINR(totals.gross), "", fmtINR(totals.net)]}
+          />
+        }
+      />
       <div className="p-4">
         <div className="overflow-auto rounded border border-border bg-card">
           <table className="grid-table">
