@@ -7,6 +7,16 @@ export interface Company {
   shortCode: string;
   address?: string;
   gstin?: string;
+  /** APMC license / mandi shop license no. */
+  apmcLicense?: string;
+  mobile?: string;
+  altMobile?: string;
+  email?: string;
+  website?: string;
+  /** Logo as data-URL (base64 PNG/JPEG) — embedded so PDFs work fully offline. */
+  logoDataUrl?: string;
+  /** Optional invoice/bill footer text (terms, signature line). */
+  billFooter?: string;
   createdAt: number;
 }
 
@@ -18,12 +28,18 @@ export interface FinancialYear {
   endDate: string; // ISO
 }
 
+export type AppRole = "admin" | "operator" | "accountant" | "viewer";
+
 export interface User {
   id?: number;
   username: string;
   password: string; // mock only
   name: string;
-  role: "admin" | "operator" | "viewer";
+  role: AppRole;
+  email?: string;
+  mobile?: string;
+  active?: boolean;
+  invitedAt?: number;
 }
 
 // ===== Masters =====
