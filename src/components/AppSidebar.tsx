@@ -13,6 +13,7 @@ import {
   CalendarRange,
 } from "lucide-react";
 import { useAppSession } from "@/lib/session-context";
+import { can } from "@/lib/db";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -20,6 +21,8 @@ interface NavItem {
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   shortcut?: string;
+  /** Permission gate. When omitted, item is shown to all authenticated users. */
+  requires?: "settings" | "manageUsers" | "manageMasters" | "entry" | "voucher" | "reports";
 }
 
 interface NavGroup {
@@ -35,9 +38,9 @@ const groups: NavGroup[] = [
   {
     label: "Entry",
     items: [
-      { label: "Challan Entry", to: "/app/entry/challan", icon: Truck, shortcut: "F2" },
-      { label: "Stock Sale", to: "/app/stock/sale", icon: Receipt, shortcut: "F4" },
-      { label: "Voucher (Pay/Recv)", to: "/app/entry/voucher", icon: Receipt, shortcut: "F3" },
+      { label: "Challan Entry", to: "/app/entry/challan", icon: Truck, shortcut: "F2", requires: "entry" },
+      { label: "Stock Sale", to: "/app/stock/sale", icon: Receipt, shortcut: "F4", requires: "entry" },
+      { label: "Voucher (Pay/Recv)", to: "/app/entry/voucher", icon: Receipt, shortcut: "F3", requires: "voucher" },
     ],
   },
   {
@@ -65,9 +68,15 @@ const groups: NavGroup[] = [
   {
     label: "Masters",
     items: [
-      { label: "Parties", to: "/app/masters/parties", icon: Users },
-      { label: "Items / Quality / Size", to: "/app/masters/items", icon: Package },
-      { label: "Expenses & Packing", to: "/app/masters/expenses", icon: Settings },
+      { label: "Parties", to: "/app/masters/parties", icon: Users, requires: "manageMasters" },
+      { label: "Items / Quality / Size", to: "/app/masters/items", icon: Package, requires: "manageMasters" },
+      { label: "Expenses & Packing", to: "/app/masters/expenses", icon: Settings, requires: "manageMasters" },
+    ],
+  },
+  {
+    label: "Admin",
+    items: [
+      { label: "Settings & Users", to: "/app/settings", icon: Settings, requires: "settings" },
     ],
   },
 ];
