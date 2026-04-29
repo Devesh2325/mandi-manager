@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
+import { PdfActions } from "@/components/PdfActions";
 import { fmtQty } from "@/lib/format";
 import { Receipt } from "lucide-react";
 
