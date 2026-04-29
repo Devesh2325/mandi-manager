@@ -50,9 +50,31 @@ function StockPage() {
   });
   const rows = Array.from(map.values()).filter((row) => row.qtyIn - row.qtyOut > 0);
 
+  const pdfRows = rows.map((r) => [
+    r.date, r.challanNo,
+    parties.find((x) => x.id === r.farmerId)?.name ?? "—",
+    items.find((x) => x.id === r.itemId)?.name ?? "—",
+    qualities.find((x) => x.id === r.qualityId)?.name ?? "—",
+    fmtQty(r.qtyIn), fmtQty(r.qtyOut), fmtQty(r.qtyIn - r.qtyOut),
+  ]);
+
   return (
     <>
-      <TopBar title="Stock Register" />
+      <TopBar
+        title="Stock Register"
+        right={
+          <PdfActions
+            title="Stock Register"
+            filename="stock-register"
+            orientation="l"
+            columns={[
+              { header: "Date" }, { header: "Challan" }, { header: "Farmer" }, { header: "Item" }, { header: "Quality" },
+              { header: "Qty In", num: true }, { header: "Qty Out", num: true }, { header: "Balance", num: true },
+            ]}
+            rows={pdfRows}
+          />
+        }
+      />
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">Showing remaining stock balances lot-wise for quick sale.</div>

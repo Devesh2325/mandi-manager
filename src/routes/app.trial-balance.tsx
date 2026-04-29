@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
+import { PdfActions } from "@/components/PdfActions";
 import { fmtINR } from "@/lib/format";
 
 export const Route = createFileRoute("/app/trial-balance")({
@@ -25,9 +26,27 @@ function TrialBalancePage() {
   const totDr = rows.reduce((a, r) => a + (r.bal > 0 ? r.bal : 0), 0);
   const totCr = rows.reduce((a, r) => a + (r.bal < 0 ? -r.bal : 0), 0);
 
+  const pdfRows = rows.map((r) => [
+    r.p.name, r.p.type.toUpperCase(),
+    r.bal > 0 ? fmtINR(r.bal) : "—",
+    r.bal < 0 ? fmtINR(-r.bal) : "—",
+  ]);
+
   return (
     <>
-      <TopBar title="Trial Balance" />
+      <TopBar
+        title="Trial Balance"
+        right={
+          <PdfActions
+            title="Trial Balance"
+            filename="trial-balance"
+            subtitle={totDr === totCr ? "✓ Balanced" : `Difference: ${fmtINR(Math.abs(totDr - totCr))}`}
+            columns={[{ header: "Party" }, { header: "Type" }, { header: "Debit", num: true }, { header: "Credit", num: true }]}
+            rows={pdfRows}
+            footer={["Totals", "", fmtINR(totDr), fmtINR(totCr)]}
+          />
+        }
+      />
       <div className="p-4">
         <div className="overflow-auto rounded border border-border bg-card">
           <table className="grid-table">
