@@ -163,7 +163,8 @@ export function AppSidebar() {
               })}
             </div>
           </div>
-        ))}
+          );
+        })}
       </nav>
 
       {/* User */}
