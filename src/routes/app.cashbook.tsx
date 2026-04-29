@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
+import { PdfActions } from "@/components/PdfActions";
 import { fmtINR } from "@/lib/format";
 
 export const Route = createFileRoute("/app/cashbook")({
@@ -14,9 +15,36 @@ function CashBookPage() {
   const vouchers = useLiveQuery(async () => (ready ? await db.vouchers.where({ companyId, yearId }).toArray() : []), [companyId, yearId, ready]) ?? [];
   const parties = useLiveQuery(async () => (ready ? await db.parties.where({ companyId, yearId }).toArray() : []), [companyId, yearId, ready]) ?? [];
   const totals = vouchers.reduce((a, v) => v.type === "receipt" ? { ...a, recv: a.recv + v.amount } : v.type === "payment" ? { ...a, pay: a.pay + v.amount } : a, { recv: 0, pay: 0 });
+
+  const pdfRows = vouchers.slice().reverse().map((v) => [
+    v.date, v.voucherNo,
+    parties.find((p) => p.id === v.partyId)?.name ?? "—",
+    v.type.toUpperCase(),
+    v.narration ?? "—",
+    v.type === "receipt" ? fmtINR(v.amount) : "—",
+    v.type === "payment" ? fmtINR(v.amount) : "—",
+  ]);
+
   return (
     <>
-      <TopBar title="Cash Book" />
+      <TopBar
+        title="Cash Book"
+        right={
+          <PdfActions
+            title="Cash Book"
+            filename="cash-book"
+            orientation="l"
+            subtitle={`Receipts ${fmtINR(totals.recv)} · Payments ${fmtINR(totals.pay)} · Balance ${fmtINR(totals.recv - totals.pay)}`}
+            columns={[
+              { header: "Date" }, { header: "Voucher" }, { header: "Party" },
+              { header: "Type" }, { header: "Narration" },
+              { header: "Receipt", num: true }, { header: "Payment", num: true },
+            ]}
+            rows={pdfRows}
+            footer={["", "", "", "", "Totals", fmtINR(totals.recv), fmtINR(totals.pay)]}
+          />
+        }
+      />
       <div className="p-4">
         <div className="mb-3 grid grid-cols-3 gap-3">
           <Box label="Receipts" value={fmtINR(totals.recv)} accent="credit" />
