@@ -123,6 +123,31 @@ export function AppSidebar() {
         <div className="text-sm font-semibold">{year?.label ?? "—"}</div>
       </Link>
 
+      {/* Cloud tenant + super admin */}
+      {(isSuperAdmin || activeTenant) && (
+        <div className="pebble-sm flex flex-col gap-1 px-3 py-2 text-xs">
+          {activeTenant && (
+            <div className="truncate">
+              <span className="text-muted-foreground">Tenant: </span>
+              <span className="font-semibold">{activeTenant.company_name}</span>
+              {impersonating && (
+                <span className="ml-1 rounded bg-amber-500/20 px-1 py-0.5 text-[9px] uppercase text-amber-700">
+                  impersonating
+                </span>
+              )}
+            </div>
+          )}
+          {isSuperAdmin && (
+            <Link
+              to="/super-admin"
+              className="inline-flex items-center gap-1.5 self-start rounded bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/20"
+            >
+              <Shield className="h-3 w-3" /> Super Admin
+            </Link>
+          )}
+        </div>
+      )}
+
       {/* Nav */}
       <nav id="tour-nav" data-tour="nav" className="flex-1 overflow-y-auto -mx-1 px-1">
         {groups.map((g) => {
