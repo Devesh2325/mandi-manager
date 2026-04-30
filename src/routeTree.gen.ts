@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuperAdminRouteImport } from './routes/super-admin'
 import { Route as SelectContextRouteImport } from './routes/select-context'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -32,6 +34,11 @@ import { Route as AppMastersCompaniesRouteImport } from './routes/app.masters.co
 import { Route as AppEntryVoucherRouteImport } from './routes/app.entry.voucher'
 import { Route as AppEntryChallanRouteImport } from './routes/app.entry.challan'
 
+const SuperAdminRoute = SuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SelectContextRoute = SelectContextRouteImport.update({
   id: '/select-context',
   path: '/select-context',
@@ -40,6 +47,11 @@ const SelectContextRoute = SelectContextRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -146,8 +158,10 @@ const AppEntryChallanRoute = AppEntryChallanRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/super-admin': typeof SuperAdminRoute
   '/app/bills': typeof AppBillsRoute
   '/app/cashbook': typeof AppCashbookRoute
   '/app/entry': typeof AppEntryRouteWithChildren
@@ -169,8 +183,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/super-admin': typeof SuperAdminRoute
   '/app/bills': typeof AppBillsRoute
   '/app/cashbook': typeof AppCashbookRoute
   '/app/entry': typeof AppEntryRouteWithChildren
@@ -194,8 +210,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
+  '/super-admin': typeof SuperAdminRoute
   '/app/bills': typeof AppBillsRoute
   '/app/cashbook': typeof AppCashbookRoute
   '/app/entry': typeof AppEntryRouteWithChildren
@@ -220,8 +238,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/auth'
     | '/login'
     | '/select-context'
+    | '/super-admin'
     | '/app/bills'
     | '/app/cashbook'
     | '/app/entry'
@@ -243,8 +263,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/login'
     | '/select-context'
+    | '/super-admin'
     | '/app/bills'
     | '/app/cashbook'
     | '/app/entry'
@@ -267,8 +289,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/auth'
     | '/login'
     | '/select-context'
+    | '/super-admin'
     | '/app/bills'
     | '/app/cashbook'
     | '/app/entry'
@@ -292,12 +316,21 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRoute
   LoginRoute: typeof LoginRoute
   SelectContextRoute: typeof SelectContextRoute
+  SuperAdminRoute: typeof SuperAdminRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/super-admin': {
+      id: '/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof SuperAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/select-context': {
       id: '/select-context'
       path: '/select-context'
@@ -310,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -522,8 +562,10 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRoute,
   LoginRoute: LoginRoute,
   SelectContextRoute: SelectContextRoute,
+  SuperAdminRoute: SuperAdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

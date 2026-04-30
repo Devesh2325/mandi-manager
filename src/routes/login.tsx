@@ -102,6 +102,13 @@ function LoginPage() {
           >
             {busy ? "Signing in…" : "Sign in"}
           </button>
+
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            New here?{" "}
+            <a href="/auth" className="font-semibold text-primary hover:underline">
+              Create cloud account / tenant →
+            </a>
+          </div>
         </form>
       </div>
     </div>
