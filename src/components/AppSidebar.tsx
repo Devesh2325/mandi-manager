@@ -11,8 +11,10 @@ import {
   LogOut,
   Building2,
   CalendarRange,
+  Shield,
 } from "lucide-react";
 import { useAppSession } from "@/lib/session-context";
+import { useTenant } from "@/lib/tenant-context";
 import { can } from "@/lib/db";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +85,7 @@ const groups: NavGroup[] = [
 
 export function AppSidebar() {
   const { company, year, session, logout } = useAppSession();
+  const { isSuperAdmin, activeTenant, impersonating } = useTenant();
   const location = useLocation();
   const path = location.pathname;
 
