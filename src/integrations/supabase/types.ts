@@ -650,7 +650,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      apply_tenant_rls: { Args: { _table: string }; Returns: undefined }
       can_write_tenant: {
         Args: { _tenant_id: string; _user_id: string }
         Returns: boolean
