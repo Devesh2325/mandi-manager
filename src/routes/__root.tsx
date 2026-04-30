@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteLoader } from "@/components/RouteLoader";
 import { SessionProvider, useAppSession } from "@/lib/session-context";
+import { TenantProvider, useTenant } from "@/lib/tenant-context";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -74,12 +75,34 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <SessionProvider>
-      <RouteLoader />
-      <RouteGuard />
-      <Outlet />
-      <Toaster richColors position="top-right" />
-    </SessionProvider>
+    <TenantProvider>
+      <SessionProvider>
+        <RouteLoader />
+        <ImpersonationBanner />
+        <RouteGuard />
+        <Outlet />
+        <Toaster richColors position="top-right" />
+      </SessionProvider>
+    </TenantProvider>
+  );
+}
+
+function ImpersonationBanner() {
+  const { impersonating, activeTenant, setActiveTenant } = useTenant();
+  if (!impersonating || !activeTenant) return null;
+  return (
+    <div className="sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-amber-500/40 bg-amber-500/10 px-4 py-1.5 text-xs text-amber-900 dark:text-amber-200">
+      <span>
+        <span className="font-semibold">Super Admin:</span> impersonating tenant{" "}
+        <span className="font-mono">{activeTenant.company_name}</span>
+      </span>
+      <button
+        onClick={() => setActiveTenant(null)}
+        className="rounded border border-amber-500/40 bg-background/40 px-2 py-0.5 text-[11px] hover:bg-background/70"
+      >
+        Stop impersonating
+      </button>
+    </div>
   );
 }
 
