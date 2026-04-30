@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useTenant, type CloudTenant } from "@/lib/tenant-context";
+import { useTenant } from "@/lib/tenant-context";
 import { toast } from "sonner";
 import { Building2, Users, FileText, Power, LogIn, Plus, ArrowLeft } from "lucide-react";
 
@@ -91,7 +91,7 @@ function SuperAdminPage() {
       license_number: newLicense || null,
       owner_user_id: cloudUser!.id,
       status: "active",
-    } as Partial<CloudTenant>);
+    });
     setCreating(false);
     if (error) {
       toast.error(error.message);
