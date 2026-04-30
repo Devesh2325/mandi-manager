@@ -117,6 +117,10 @@ function RouteGuard() {
     const isLogin = path === "/login";
     const isSelect = path === "/select-context";
     const isApp = path === "/app" || path.startsWith("/app/");
+    const isCloudAuth = path === "/auth" || path === "/super-admin";
+
+    // Cloud-auth pages run independently of the local IndexedDB session.
+    if (isCloudAuth) return;
 
     if (!session && !isLogin) {
       router.navigate({ to: "/login" });
