@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, can, type AppRole } from "@/lib/db";
 import { useAppSession } from "@/lib/session-context";
+import { useTenant } from "@/lib/tenant-context";
 import { TopBar } from "@/components/TopBar";
+import { CloudSyncButton } from "@/components/CloudSync";
 import { buildBrandedPdf, openPdfPrint } from "@/lib/pdf";
 import {
   Building2, Image as ImageIcon, Save, Upload, Trash2, Users, UserPlus,
-  Eye, FileText, ShieldCheck, ShieldAlert,
+  Eye, FileText, ShieldCheck, ShieldAlert, Cloud,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,9 +51,58 @@ function SettingsPage() {
       <TopBar title="Settings" />
       <div className="space-y-6 p-4 pb-12">
         <CompanyProfileCard />
+        <CloudSyncCard />
         <UsersCard />
       </div>
     </>
+  );
+}
+
+function CloudSyncCard() {
+  const { cloudUser, activeTenant, isSuperAdmin } = useTenant();
+  return (
+    <section className="rounded-lg border border-border bg-card">
+      <header className="flex items-center justify-between border-b border-border px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Cloud className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold">Cloud Sync</h2>
+        </div>
+      </header>
+      <div className="space-y-3 p-4 text-sm">
+        {!cloudUser ? (
+          <p className="text-muted-foreground">
+            Not signed in to cloud.{" "}
+            <Link to="/auth" className="font-semibold text-primary underline">
+              Sign in or create a tenant
+            </Link>{" "}
+            to enable cross-device sync, backup, and Super Admin visibility.
+          </p>
+        ) : (
+          <>
+            <div className="rounded-md border border-border bg-muted/30 p-3 text-xs">
+              <div>
+                <span className="text-muted-foreground">Signed in as:</span>{" "}
+                <span className="font-mono">{cloudUser.email}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Active tenant:</span>{" "}
+                <span className="font-semibold">
+                  {activeTenant?.company_name ?? (isSuperAdmin ? "— (super admin, none selected)" : "—")}
+                </span>
+              </div>
+            </div>
+            <p className="text-muted-foreground">
+              Push everything from this device's local store to the active cloud tenant.
+              The cloud copy for this tenant is replaced with the local copy. Local data is
+              never modified.
+            </p>
+            <div>
+              <CloudSyncButton />
+            </div>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 

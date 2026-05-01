@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { RouteLoader } from "@/components/RouteLoader";
 import { SessionProvider, useAppSession } from "@/lib/session-context";
 import { TenantProvider, useTenant } from "@/lib/tenant-context";
+import { CloudSyncManager } from "@/components/CloudSync";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -81,6 +82,7 @@ function RootComponent() {
         <ImpersonationBanner />
         <RouteGuard />
         <Outlet />
+        <CloudSyncManager />
         <Toaster richColors position="top-right" />
       </SessionProvider>
     </TenantProvider>
