@@ -36,7 +36,7 @@ function AuthPage() {
         }
         const redirect =
           typeof window !== "undefined" ? `${window.location.origin}/auth` : undefined;
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -50,13 +50,23 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Account created. Check your email to verify, then sign in.");
-        setMode("signin");
+        if (data.session) {
+          toast.success("Workspace created. Welcome!");
+          navigate({ to: "/app" });
+        } else {
+          toast.success("Account created. Check your email to verify, then sign in.");
+          setMode("signin");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Signed in.");
-        navigate({ to: "/super-admin" }).catch(() => navigate({ to: "/app" }));
+        // Super admin lands on the admin console; everyone else on the app.
+        if (email.trim().toLowerCase() === "dmchaturvedi@gmail.com") {
+          navigate({ to: "/super-admin" });
+        } else {
+          navigate({ to: "/app" });
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed.";
