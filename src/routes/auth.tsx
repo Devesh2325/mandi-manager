@@ -36,7 +36,7 @@ function AuthPage() {
         }
         const redirect =
           typeof window !== "undefined" ? `${window.location.origin}/auth` : undefined;
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -50,13 +50,23 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        toast.success("Account created. Check your email to verify, then sign in.");
-        setMode("signin");
+        if (data.session) {
+          toast.success("Workspace created. Welcome!");
+          navigate({ to: "/app" });
+        } else {
+          toast.success("Account created. Check your email to verify, then sign in.");
+          setMode("signin");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Signed in.");
-        navigate({ to: "/super-admin" }).catch(() => navigate({ to: "/app" }));
+        // Super admin lands on the admin console; everyone else on the app.
+        if (email.trim().toLowerCase() === "dmchaturvedi@gmail.com") {
+          navigate({ to: "/super-admin" });
+        } else {
+          navigate({ to: "/app" });
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed.";
@@ -130,7 +140,7 @@ function AuthPage() {
             <>
               <Field label="Your name">
                 <input
-                  className="input"
+                  className={inputCls}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
@@ -138,7 +148,7 @@ function AuthPage() {
               </Field>
               <Field label="Company name">
                 <input
-                  className="input"
+                  className={inputCls}
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   required
@@ -147,14 +157,14 @@ function AuthPage() {
               <div className="grid grid-cols-2 gap-3">
                 <Field label="GSTIN (optional)">
                   <input
-                    className="input"
+                    className={inputCls}
                     value={gst}
                     onChange={(e) => setGst(e.target.value)}
                   />
                 </Field>
                 <Field label="APMC License (optional)">
                   <input
-                    className="input"
+                    className={inputCls}
                     value={license}
                     onChange={(e) => setLicense(e.target.value)}
                   />
@@ -166,7 +176,7 @@ function AuthPage() {
           <Field label="Email">
             <input
               type="email"
-              className="input"
+              className={inputCls}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -176,7 +186,7 @@ function AuthPage() {
           <Field label="Password">
             <input
               type="password"
-              className="input"
+              className={inputCls}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -195,11 +205,21 @@ function AuthPage() {
                 ? "Sign in"
                 : "Create account"}
           </button>
+
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            Looking for the offline terminal?{" "}
+            <a href="/login" className="font-semibold text-primary hover:underline">
+              Use local sign-in →
+            </a>
+          </div>
         </form>
       </div>
     </div>
   );
 }
+
+const inputCls =
+  "block w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -208,8 +228,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
         {label}
       </span>
       <div className="mt-1">{children}</div>
-      <style>{`.input{display:block;width:100%;border:1px solid hsl(var(--input));border-radius:6px;background:hsl(var(--background));padding:8px 12px;font-size:14px;outline:none}
-.input:focus{border-color:hsl(var(--ring));box-shadow:0 0 0 1px hsl(var(--ring))}`}</style>
     </label>
   );
 }
