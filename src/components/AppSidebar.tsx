@@ -12,6 +12,7 @@ import {
   Building2,
   CalendarRange,
   Shield,
+  Sparkles,
 } from "lucide-react";
 import { useAppSession } from "@/lib/session-context";
 import { useTenant } from "@/lib/tenant-context";
@@ -79,6 +80,7 @@ const groups: NavGroup[] = [
     label: "Admin",
     items: [
       { label: "Settings & Users", to: "/app/settings", icon: Settings, requires: "settings" },
+      { label: "Buy plan", to: "/app/pricing", icon: Sparkles },
     ],
   },
 ];
