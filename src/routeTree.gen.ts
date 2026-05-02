@@ -20,6 +20,7 @@ import { Route as AppTrialBalanceRouteImport } from './routes/app.trial-balance'
 import { Route as AppTeepRouteImport } from './routes/app.teep'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppReportsRouteImport } from './routes/app.reports'
+import { Route as AppPricingRouteImport } from './routes/app.pricing'
 import { Route as AppMastersRouteImport } from './routes/app.masters'
 import { Route as AppLedgerRouteImport } from './routes/app.ledger'
 import { Route as AppEntryRouteImport } from './routes/app.entry'
@@ -87,6 +88,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppReportsRoute = AppReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPricingRoute = AppPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMastersRoute = AppMastersRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/app/entry': typeof AppEntryRouteWithChildren
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
+  '/app/pricing': typeof AppPricingRoute
   '/app/reports': typeof AppReportsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/app/entry': typeof AppEntryRouteWithChildren
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
+  '/app/pricing': typeof AppPricingRoute
   '/app/reports': typeof AppReportsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/app/entry': typeof AppEntryRouteWithChildren
   '/app/ledger': typeof AppLedgerRoute
   '/app/masters': typeof AppMastersRouteWithChildren
+  '/app/pricing': typeof AppPricingRoute
   '/app/reports': typeof AppReportsRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/app/entry'
     | '/app/ledger'
     | '/app/masters'
+    | '/app/pricing'
     | '/app/reports'
     | '/app/settings'
     | '/app/teep'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/app/entry'
     | '/app/ledger'
     | '/app/masters'
+    | '/app/pricing'
     | '/app/reports'
     | '/app/settings'
     | '/app/teep'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/app/entry'
     | '/app/ledger'
     | '/app/masters'
+    | '/app/pricing'
     | '/app/reports'
     | '/app/settings'
     | '/app/teep'
@@ -399,6 +411,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/app/reports'
       preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/pricing': {
+      id: '/app/pricing'
+      path: '/pricing'
+      fullPath: '/app/pricing'
+      preLoaderRoute: typeof AppPricingRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/masters': {
@@ -533,6 +552,7 @@ interface AppRouteChildren {
   AppEntryRoute: typeof AppEntryRouteWithChildren
   AppLedgerRoute: typeof AppLedgerRoute
   AppMastersRoute: typeof AppMastersRouteWithChildren
+  AppPricingRoute: typeof AppPricingRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTeepRoute: typeof AppTeepRoute
@@ -548,6 +568,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppEntryRoute: AppEntryRouteWithChildren,
   AppLedgerRoute: AppLedgerRoute,
   AppMastersRoute: AppMastersRouteWithChildren,
+  AppPricingRoute: AppPricingRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTeepRoute: AppTeepRoute,
