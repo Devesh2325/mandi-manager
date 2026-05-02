@@ -68,10 +68,9 @@ function LoginPage() {
       {/* Right: form */}
       <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
         <form onSubmit={onSubmit} className="w-full max-w-sm">
-          <h1 className="text-2xl font-semibold">Sign in</h1>
+          <h1 className="text-2xl font-semibold">Local sign-in</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Use <span className="font-mono">admin / admin</span> or{" "}
-            <span className="font-mono">munim / munim</span>
+            Offline terminal mode. Demo: <span className="font-mono">admin / admin</span>
           </p>
 
           <label className="mt-6 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -80,7 +79,7 @@ function LoginPage() {
           <input
             value={u}
             onChange={(e) => setU(e.target.value)}
-            className="mt-1 w-full rounded border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring focus:ring-1 focus:ring-ring"
+            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring"
             autoFocus
           />
 
@@ -91,7 +90,7 @@ function LoginPage() {
             type="password"
             value={p}
             onChange={(e) => setP(e.target.value)}
-            className="mt-1 w-full rounded border border-input bg-background px-3 py-2 text-sm outline-none focus:border-ring focus:ring-1 focus:ring-ring"
+            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring"
           />
 
           {err && <div className="mt-3 text-xs text-destructive">{err}</div>}
@@ -103,10 +102,16 @@ function LoginPage() {
             {busy ? "Signing in…" : "Sign in"}
           </button>
 
-          <div className="mt-4 text-center text-xs text-muted-foreground">
-            New here?{" "}
-            <a href="/auth" className="font-semibold text-primary hover:underline">
-              Create cloud account / tenant →
+          <div className="mt-6 rounded-md border border-border bg-muted/40 p-3 text-xs">
+            <div className="font-semibold text-foreground">New here? Create your workspace.</div>
+            <p className="mt-1 text-muted-foreground">
+              Sign up on the cloud screen — your own multi-tenant company workspace.
+            </p>
+            <a
+              href="/auth"
+              className="mt-2 inline-block font-semibold text-primary hover:underline"
+            >
+              Go to cloud sign-in / sign-up →
             </a>
           </div>
         </form>
