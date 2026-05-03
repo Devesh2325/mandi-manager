@@ -10,8 +10,8 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { login } = useAppSession();
   const navigate = useNavigate();
-  const [u, setU] = useState("admin");
-  const [p, setP] = useState("admin");
+  const [u, setU] = useState("");
+  const [p, setP] = useState("");
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -70,8 +70,17 @@ function LoginPage() {
         <form onSubmit={onSubmit} className="w-full max-w-sm">
           <h1 className="text-2xl font-semibold">Local sign-in</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Offline terminal mode. Demo: <span className="font-mono">admin / admin</span>
+            Offline terminal mode for existing on-device users only. New users should use cloud sign-up.
           </p>
+          <div className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs">
+            <div className="font-semibold text-foreground">First time here?</div>
+            <p className="mt-1 text-muted-foreground">
+              Create a fresh cloud workspace — your own company, masters and users.
+            </p>
+            <a href="/auth" className="mt-2 inline-block font-semibold text-primary hover:underline">
+              Sign up on cloud →
+            </a>
+          </div>
 
           <label className="mt-6 block text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Username
@@ -79,6 +88,8 @@ function LoginPage() {
           <input
             value={u}
             onChange={(e) => setU(e.target.value)}
+            placeholder="Username"
+            autoComplete="off"
             className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring"
             autoFocus
           />
@@ -90,6 +101,8 @@ function LoginPage() {
             type="password"
             value={p}
             onChange={(e) => setP(e.target.value)}
+            placeholder="Password"
+            autoComplete="current-password"
             className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-1 focus:ring-ring"
           />
 
@@ -102,18 +115,6 @@ function LoginPage() {
             {busy ? "Signing in…" : "Sign in"}
           </button>
 
-          <div className="mt-6 rounded-md border border-border bg-muted/40 p-3 text-xs">
-            <div className="font-semibold text-foreground">New here? Create your workspace.</div>
-            <p className="mt-1 text-muted-foreground">
-              Sign up on the cloud screen — your own multi-tenant company workspace.
-            </p>
-            <a
-              href="/auth"
-              className="mt-2 inline-block font-semibold text-primary hover:underline"
-            >
-              Go to cloud sign-in / sign-up →
-            </a>
-          </div>
         </form>
       </div>
     </div>
