@@ -42,6 +42,8 @@ export interface User {
   mobile?: string;
   active?: boolean;
   invitedAt?: number;
+  /** Cloud workspace owner UUID. Undefined = legacy/offline demo user. */
+  cloudOwnerId?: string;
 }
 
 // ===== Masters =====
