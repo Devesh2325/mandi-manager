@@ -17,6 +17,8 @@ export interface Company {
   logoDataUrl?: string;
   /** Optional invoice/bill footer text (terms, signature line). */
   billFooter?: string;
+  /** Cloud user UUID that owns this workspace. Undefined = legacy/offline-only. */
+  cloudOwnerId?: string;
   createdAt: number;
 }
 
@@ -40,6 +42,8 @@ export interface User {
   mobile?: string;
   active?: boolean;
   invitedAt?: number;
+  /** Cloud workspace owner UUID. Undefined = legacy/offline demo user. */
+  cloudOwnerId?: string;
 }
 
 // ===== Masters =====
@@ -312,9 +316,35 @@ export function can(role: AppRole | undefined, perm: keyof typeof ROLE_PERMS["ad
 }
 
 // ============ Seed ============
+/**
+ * Seed defaults into local IndexedDB.
+ *
+ * For cloud-authenticated users we MUST NOT create the demo companies / users —
+ * otherwise a new tenant signing up sees "Shree Balaji Trading Co." plus the
+ * demo `admin`/`munim` accounts mixed in with their own workspace. Their own
+ * workspace + admin user is created by `bootstrapLocalFromCloud`.
+ *
+ * Demo seed only runs in pure offline mode (no cloud session).
+ */
+function hasCloudSession(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i) ?? "";
+      if (k.startsWith("sb-") && k.endsWith("-auth-token")) {
+        const v = localStorage.getItem(k);
+        if (v && v !== "null") return true;
+      }
+    }
+  } catch { /* ignore */ }
+  return false;
+}
+
 export async function seedIfEmpty() {
+  const cloud = hasCloudSession();
+
   const userCount = await db.users.count();
-  if (userCount === 0) {
+  if (userCount === 0 && !cloud) {
     await db.users.bulkAdd([
       { username: "admin", password: "admin", name: "Administrator", role: "admin" },
       { username: "munim", password: "munim", name: "Munim ji", role: "operator" },
@@ -322,7 +352,7 @@ export async function seedIfEmpty() {
   }
 
   const companyCount = await db.companies.count();
-  if (companyCount === 0) {
+  if (companyCount === 0 && !cloud) {
     const cId = await db.companies.add({
       name: "Shree Balaji Trading Co.",
       shortCode: "SBT",

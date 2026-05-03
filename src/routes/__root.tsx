@@ -95,25 +95,30 @@ function RootComponent() {
  * When a cloud user is signed in but has no local IndexedDB session yet
  * (typical for fresh signups), build a local workspace mirroring their tenant
  * so /app and master data screens work immediately.
+ *
+ * Also re-bootstraps when the current local session points to a company that
+ * isn't owned by this cloud user (e.g. left over from the legacy demo seed)
+ * — this prevents new signups from landing on another workspace's data.
  */
 function CloudBootstrapper() {
   const { cloudUser, activeTenant, isSuperAdmin, ready: tenantReady } = useTenant();
-  const { session, ready: sessReady } = useAppSession();
+  const { session, company, ready: sessReady } = useAppSession();
   const did = useRef(false);
 
   useEffect(() => {
     if (!tenantReady || !sessReady) return;
     if (!cloudUser) return;
-    if (session?.companyId && session?.yearId) return;
+    const ownsCurrentCompany =
+      !!company && company.cloudOwnerId === cloudUser.id;
+    if (session?.companyId && session?.yearId && ownsCurrentCompany) return;
     if (did.current) return;
-    // Super admin without an active tenant still gets a local workspace so they can land on /app or /super-admin without a redirect loop.
     did.current = true;
     bootstrapLocalFromCloud(cloudUser, activeTenant, isSuperAdmin).catch((err) => {
       // eslint-disable-next-line no-console
       console.error("cloud bootstrap failed", err);
       did.current = false;
     });
-  }, [tenantReady, sessReady, cloudUser, activeTenant, isSuperAdmin, session]);
+  }, [tenantReady, sessReady, cloudUser, activeTenant, isSuperAdmin, session, company]);
 
   return null;
 }

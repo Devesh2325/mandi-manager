@@ -283,7 +283,14 @@ function Field({
 // ============================================================
 function UsersCard() {
   const { session } = useAppSession();
-  const users = useLiveQuery(() => db.users.toArray(), []) ?? [];
+  const { cloudUser } = useTenant();
+  const ownerId = cloudUser?.id;
+  const users = useLiveQuery(async () => {
+    const all = await db.users.toArray();
+    return ownerId
+      ? all.filter((u) => u.cloudOwnerId === ownerId)
+      : all.filter((u) => !u.cloudOwnerId);
+  }, [ownerId]) ?? [];
   const [showInvite, setShowInvite] = useState(false);
 
   const remove = async (id: number, username: string) => {
@@ -413,6 +420,8 @@ function UsersCard() {
 }
 
 function InviteDialog({ onClose }: { onClose: () => void }) {
+  const { cloudUser } = useTenant();
+  const ownerId = cloudUser?.id;
   const [form, setForm] = useState({
     name: "", username: "", mobile: "", email: "", password: "", role: "operator" as AppRole,
   });
@@ -423,7 +432,11 @@ function InviteDialog({ onClose }: { onClose: () => void }) {
       toast.error("Name, username and password are required");
       return;
     }
-    const exists = await db.users.where("username").equals(form.username.trim()).first();
+    // Username uniqueness scoped to this workspace.
+    const all = await db.users.where("username").equals(form.username.trim()).toArray();
+    const exists = ownerId
+      ? all.find((u) => u.cloudOwnerId === ownerId)
+      : all.find((u) => !u.cloudOwnerId);
     if (exists) { toast.error("Username already exists"); return; }
     setBusy(true);
     try {
@@ -436,6 +449,7 @@ function InviteDialog({ onClose }: { onClose: () => void }) {
         email: form.email || undefined,
         active: true,
         invitedAt: Date.now(),
+        cloudOwnerId: ownerId,
       });
       toast.success(`Invited ${form.name} as ${form.role}. Share their login credentials.`);
       onClose();

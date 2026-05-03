@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import { db, seedMasters, ensureCompanyHasYear, type Company, type FinancialYear } from "@/lib/db";
 import { useAppSession } from "@/lib/session-context";
+import { useTenant } from "@/lib/tenant-context";
 import { Plus, Trash2, Pencil, Building2, CalendarRange, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/app/masters/companies")({
@@ -11,7 +12,14 @@ export const Route = createFileRoute("/app/masters/companies")({
 
 function CompaniesPage() {
   const { company: activeCompany, year: activeYear, selectContext } = useAppSession();
-  const companies = useLiveQuery(() => db.companies.toArray(), []) ?? [];
+  const { cloudUser } = useTenant();
+  const ownerId = cloudUser?.id;
+  const companies = useLiveQuery(async () => {
+    const all = await db.companies.toArray();
+    return ownerId
+      ? all.filter((c) => c.cloudOwnerId === ownerId)
+      : all.filter((c) => !c.cloudOwnerId);
+  }, [ownerId]) ?? [];
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(
     activeCompany?.id ?? null,
   );
@@ -33,6 +41,7 @@ function CompaniesPage() {
       shortCode: editingCo.shortCode,
       address: editingCo.address,
       gstin: editingCo.gstin,
+      cloudOwnerId: editingCo.cloudOwnerId ?? ownerId,
       createdAt: editingCo.createdAt ?? Date.now(),
     };
     if (editingCo.id) {
