@@ -1,10 +1,11 @@
 import { Outlet, createRootRoute, HeadContent, Scripts, useRouter } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteLoader } from "@/components/RouteLoader";
 import { SessionProvider, useAppSession } from "@/lib/session-context";
 import { TenantProvider, useTenant } from "@/lib/tenant-context";
 import { CloudSyncManager } from "@/components/CloudSync";
+import { bootstrapLocalFromCloud } from "@/lib/cloud-bootstrap";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -80,6 +81,7 @@ function RootComponent() {
       <SessionProvider>
         <RouteLoader />
         <ImpersonationBanner />
+        <CloudBootstrapper />
         <RouteGuard />
         <Outlet />
         <CloudSyncManager />
@@ -87,6 +89,33 @@ function RootComponent() {
       </SessionProvider>
     </TenantProvider>
   );
+}
+
+/**
+ * When a cloud user is signed in but has no local IndexedDB session yet
+ * (typical for fresh signups), build a local workspace mirroring their tenant
+ * so /app and master data screens work immediately.
+ */
+function CloudBootstrapper() {
+  const { cloudUser, activeTenant, isSuperAdmin, ready: tenantReady } = useTenant();
+  const { session, ready: sessReady } = useAppSession();
+  const did = useRef(false);
+
+  useEffect(() => {
+    if (!tenantReady || !sessReady) return;
+    if (!cloudUser) return;
+    if (session?.companyId && session?.yearId) return;
+    if (did.current) return;
+    // Super admin without an active tenant still gets a local workspace so they can land on /app or /super-admin without a redirect loop.
+    did.current = true;
+    bootstrapLocalFromCloud(cloudUser, activeTenant, isSuperAdmin).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error("cloud bootstrap failed", err);
+      did.current = false;
+    });
+  }, [tenantReady, sessReady, cloudUser, activeTenant, isSuperAdmin, session]);
+
+  return null;
 }
 
 function ImpersonationBanner() {
