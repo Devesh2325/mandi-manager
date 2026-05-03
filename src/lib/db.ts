@@ -17,6 +17,8 @@ export interface Company {
   logoDataUrl?: string;
   /** Optional invoice/bill footer text (terms, signature line). */
   billFooter?: string;
+  /** Cloud user UUID that owns this workspace. Undefined = legacy/offline-only. */
+  cloudOwnerId?: string;
   createdAt: number;
 }
 
