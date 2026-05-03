@@ -154,7 +154,7 @@ function RouteGuard() {
     if (isCloudAuth) return;
 
     if (!session && !isLogin) {
-      router.navigate({ to: "/login" });
+      router.navigate({ to: "/auth" });
       return;
     }
     if (session && (!company || !year) && isApp) {
@@ -170,7 +170,7 @@ function RouteGuard() {
     } else if (path === "/" && session) {
       router.navigate({ to: "/select-context" });
     } else if (path === "/" && !session) {
-      router.navigate({ to: "/login" });
+      router.navigate({ to: "/auth" });
     }
   }, [ready, session, company, year, path, router]);
 
