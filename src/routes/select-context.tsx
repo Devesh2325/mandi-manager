@@ -3,6 +3,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
 import { db } from "@/lib/db";
 import { useAppSession } from "@/lib/session-context";
+import { useTenant } from "@/lib/tenant-context";
 import { Building2, CalendarRange, ArrowRight, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/select-context")({
@@ -11,8 +12,15 @@ export const Route = createFileRoute("/select-context")({
 
 function SelectContextPage() {
   const { session, selectContext, logout } = useAppSession();
+  const { cloudUser } = useTenant();
+  const ownerId = cloudUser?.id;
   const navigate = useNavigate();
-  const companies = useLiveQuery(() => db.companies.toArray(), []) ?? [];
+  const companies = useLiveQuery(async () => {
+    const all = await db.companies.toArray();
+    return ownerId
+      ? all.filter((c) => c.cloudOwnerId === ownerId)
+      : all.filter((c) => !c.cloudOwnerId);
+  }, [ownerId]) ?? [];
   const [companyId, setCompanyId] = useState<number | null>(null);
   const years = useLiveQuery(
     async () =>
