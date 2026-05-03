@@ -41,6 +41,7 @@ function CompaniesPage() {
       shortCode: editingCo.shortCode,
       address: editingCo.address,
       gstin: editingCo.gstin,
+      cloudOwnerId: editingCo.cloudOwnerId ?? ownerId,
       createdAt: editingCo.createdAt ?? Date.now(),
     };
     if (editingCo.id) {
