@@ -283,7 +283,14 @@ function Field({
 // ============================================================
 function UsersCard() {
   const { session } = useAppSession();
-  const users = useLiveQuery(() => db.users.toArray(), []) ?? [];
+  const { cloudUser } = useTenant();
+  const ownerId = cloudUser?.id;
+  const users = useLiveQuery(async () => {
+    const all = await db.users.toArray();
+    return ownerId
+      ? all.filter((u) => u.cloudOwnerId === ownerId)
+      : all.filter((u) => !u.cloudOwnerId);
+  }, [ownerId]) ?? [];
   const [showInvite, setShowInvite] = useState(false);
 
   const remove = async (id: number, username: string) => {
