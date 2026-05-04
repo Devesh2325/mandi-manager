@@ -153,10 +153,12 @@ function RouteGuard() {
     const isLogin = path === "/login";
     const isSelect = path === "/select-context";
     const isApp = path === "/app" || path.startsWith("/app/");
-    const isCloudAuth = path === "/auth" || path === "/super-admin";
+    const isCloudAuth =
+      path === "/auth" || path === "/super-admin" || path.startsWith("/super-admin/");
+    const isLanding = path === "/";
 
-    // Cloud-auth pages run independently of the local IndexedDB session.
-    if (isCloudAuth) return;
+    // Public landing + cloud-auth pages run independently of the local session.
+    if (isLanding || isCloudAuth) return;
 
     if (!session && !isLogin) {
       router.navigate({ to: "/auth" });
@@ -169,13 +171,6 @@ function RouteGuard() {
     if (session && company && year && (isLogin || isSelect)) {
       router.navigate({ to: "/app" });
       return;
-    }
-    if (path === "/" && session && company && year) {
-      router.navigate({ to: "/app" });
-    } else if (path === "/" && session) {
-      router.navigate({ to: "/select-context" });
-    } else if (path === "/" && !session) {
-      router.navigate({ to: "/auth" });
     }
   }, [ready, session, company, year, path, router]);
 

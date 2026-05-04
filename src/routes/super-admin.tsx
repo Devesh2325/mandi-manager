@@ -123,6 +123,12 @@ function SuperAdminPage() {
           </div>
           <div className="flex items-center gap-2">
             <Link
+              to="/super-admin/leads"
+              className="inline-flex items-center gap-1.5 rounded border px-3 py-1.5 text-xs hover:bg-muted"
+            >
+              <FileText className="h-3.5 w-3.5" /> Sales enquiries
+            </Link>
+            <Link
               to="/app"
               className="inline-flex items-center gap-1.5 rounded border px-3 py-1.5 text-xs hover:bg-muted"
             >
