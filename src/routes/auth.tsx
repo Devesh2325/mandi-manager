@@ -206,6 +206,19 @@ function AuthPage() {
                 : "Create account"}
           </button>
 
+          {mode === "signin" && (
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("dmchaturvedi@gmail.com");
+                setPassword("Devesh@23251995");
+              }}
+              className="mt-3 w-full rounded border border-dashed border-primary/40 py-2 text-xs font-medium text-primary hover:bg-primary/5"
+            >
+              ⚡ Super Admin quick fill
+            </button>
+          )}
+
           <div className="mt-4 text-center text-xs text-muted-foreground">
             Looking for the offline terminal?{" "}
             <a href="/login" className="font-semibold text-primary hover:underline">
