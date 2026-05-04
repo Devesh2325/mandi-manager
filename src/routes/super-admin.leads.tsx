@@ -35,10 +35,14 @@ function LeadsPage() {
 
   useEffect(() => {
     if (!ready) return;
-    if (!cloudUser) return navigate({ to: "/auth" });
+    if (!cloudUser) {
+      navigate({ to: "/auth" });
+      return;
+    }
     if (!isSuperAdmin) {
       toast.error("Super Admin access required.");
-      return navigate({ to: "/app" });
+      navigate({ to: "/app" });
+      return;
     }
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps

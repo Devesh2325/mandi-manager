@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as SuperAdminLeadsRouteImport } from './routes/super-admin.leads'
 import { Route as AppTrialBalanceRouteImport } from './routes/app.trial-balance'
 import { Route as AppTeepRouteImport } from './routes/app.teep'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
@@ -69,6 +70,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const SuperAdminLeadsRoute = SuperAdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => SuperAdminRoute,
 } as any)
 const AppTrialBalanceRoute = AppTrialBalanceRouteImport.update({
   id: '/trial-balance',
@@ -167,7 +173,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
-  '/super-admin': typeof SuperAdminRoute
+  '/super-admin': typeof SuperAdminRouteWithChildren
   '/app/bills': typeof AppBillsRoute
   '/app/cashbook': typeof AppCashbookRoute
   '/app/entry': typeof AppEntryRouteWithChildren
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
+  '/super-admin/leads': typeof SuperAdminLeadsRoute
   '/app/': typeof AppIndexRoute
   '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/entry/voucher': typeof AppEntryVoucherRoute
@@ -193,7 +200,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
-  '/super-admin': typeof SuperAdminRoute
+  '/super-admin': typeof SuperAdminRouteWithChildren
   '/app/bills': typeof AppBillsRoute
   '/app/cashbook': typeof AppCashbookRoute
   '/app/entry': typeof AppEntryRouteWithChildren
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
+  '/super-admin/leads': typeof SuperAdminLeadsRoute
   '/app': typeof AppIndexRoute
   '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/entry/voucher': typeof AppEntryVoucherRoute
@@ -221,7 +229,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/login': typeof LoginRoute
   '/select-context': typeof SelectContextRoute
-  '/super-admin': typeof SuperAdminRoute
+  '/super-admin': typeof SuperAdminRouteWithChildren
   '/app/bills': typeof AppBillsRoute
   '/app/cashbook': typeof AppCashbookRoute
   '/app/entry': typeof AppEntryRouteWithChildren
@@ -232,6 +240,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/teep': typeof AppTeepRoute
   '/app/trial-balance': typeof AppTrialBalanceRoute
+  '/super-admin/leads': typeof SuperAdminLeadsRoute
   '/app/': typeof AppIndexRoute
   '/app/entry/challan': typeof AppEntryChallanRoute
   '/app/entry/voucher': typeof AppEntryVoucherRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/teep'
     | '/app/trial-balance'
+    | '/super-admin/leads'
     | '/app/'
     | '/app/entry/challan'
     | '/app/entry/voucher'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/teep'
     | '/app/trial-balance'
+    | '/super-admin/leads'
     | '/app'
     | '/app/entry/challan'
     | '/app/entry/voucher'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/teep'
     | '/app/trial-balance'
+    | '/super-admin/leads'
     | '/app/'
     | '/app/entry/challan'
     | '/app/entry/voucher'
@@ -331,7 +343,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   LoginRoute: typeof LoginRoute
   SelectContextRoute: typeof SelectContextRoute
-  SuperAdminRoute: typeof SuperAdminRoute
+  SuperAdminRoute: typeof SuperAdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -384,6 +396,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/super-admin/leads': {
+      id: '/super-admin/leads'
+      path: '/leads'
+      fullPath: '/super-admin/leads'
+      preLoaderRoute: typeof SuperAdminLeadsRouteImport
+      parentRoute: typeof SuperAdminRoute
     }
     '/app/trial-balance': {
       id: '/app/trial-balance'
@@ -580,13 +599,25 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface SuperAdminRouteChildren {
+  SuperAdminLeadsRoute: typeof SuperAdminLeadsRoute
+}
+
+const SuperAdminRouteChildren: SuperAdminRouteChildren = {
+  SuperAdminLeadsRoute: SuperAdminLeadsRoute,
+}
+
+const SuperAdminRouteWithChildren = SuperAdminRoute._addFileChildren(
+  SuperAdminRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
   LoginRoute: LoginRoute,
   SelectContextRoute: SelectContextRoute,
-  SuperAdminRoute: SuperAdminRoute,
+  SuperAdminRoute: SuperAdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
