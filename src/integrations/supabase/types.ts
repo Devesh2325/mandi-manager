@@ -155,6 +155,57 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          assigned_to: string | null
+          city: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          follow_up_at: string | null
+          id: string
+          message: string | null
+          name: string
+          phone: string
+          sales_notes: string | null
+          source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          city?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          follow_up_at?: string | null
+          id?: string
+          message?: string | null
+          name: string
+          phone: string
+          sales_notes?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          city?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          follow_up_at?: string | null
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string
+          sales_notes?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ledger_entries: {
         Row: {
           created_at: string
