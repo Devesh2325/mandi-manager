@@ -11,7 +11,8 @@ export interface AuditEntry {
 export async function logAudit(action: string, entry: AuditEntry = {}) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  await supabase.from("audit_logs").insert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase.from("audit_logs") as any).insert({
     actor_id: user.id,
     tenant_id: entry.tenant_id ?? null,
     action,
