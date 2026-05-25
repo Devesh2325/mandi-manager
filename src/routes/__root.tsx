@@ -85,6 +85,7 @@ function RootComponent() {
         <RouteLoader />
         <ImpersonationBanner />
         <CloudBootstrapper />
+        <AHDjsTourInitializer />
         <RouteGuard />
         <Outlet />
         <CloudSyncManager />
