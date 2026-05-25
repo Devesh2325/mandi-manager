@@ -6,6 +6,9 @@ import { SessionProvider, useAppSession } from "@/lib/session-context";
 import { TenantProvider, useTenant } from "@/lib/tenant-context";
 import { CloudSyncManager } from "@/components/CloudSync";
 import { bootstrapLocalFromCloud } from "@/lib/cloud-bootstrap";
+// Import AHDjs tour library and its styles
+import AHDjs from "ahdjs";
+import "ahdjs/build/css/index.css";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -75,6 +78,37 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Initializes the AHDjs tour library once when the app loads.
+ * Creates an instance with the provided configuration, then loads
+ * the site map and starts highlighting the target page.
+ */
+function AHDjsTourInitializer() {
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    // Ensure initialization happens only once
+    if (initialized.current) return;
+    initialized.current = true;
+
+    // Create an AHDjs instance with the provided configuration
+    const ahd = new (AHDjs as any)(undefined, {
+      applicationId: "6a0bb067afcee1355c1b6c59",
+      apiHost: "https://pagepilot.fabbuilder.com",
+      visitorId: "visitor-id",
+      showProgressbar: false,
+    });
+
+    // Load the site map for the tour
+    ahd.initializeSiteMap();
+
+    // Show highlights for the target page
+    ahd.showHighlights("target-page", true);
+  }, []);
+
+  return null;
+}
+
 function RootComponent() {
   return (
     <TenantProvider>
@@ -82,6 +116,7 @@ function RootComponent() {
         <RouteLoader />
         <ImpersonationBanner />
         <CloudBootstrapper />
+        <AHDjsTourInitializer />
         <RouteGuard />
         <Outlet />
         <CloudSyncManager />
