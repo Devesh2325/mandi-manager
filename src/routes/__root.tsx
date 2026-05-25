@@ -80,7 +80,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 /**
  * Initializes the AHDjs tour library once when the app loads.
- * Sets up the site map and starts highlighting the target page.
+ * Creates an instance with the provided configuration, then loads
+ * the site map and starts highlighting the target page.
  */
 function AHDjsTourInitializer() {
   const initialized = useRef(false);
@@ -90,8 +91,8 @@ function AHDjsTourInitializer() {
     if (initialized.current) return;
     initialized.current = true;
 
-    // Initialize AHDjs with the provided configuration
-    AHDjs.init({
+    // Create an AHDjs instance with the provided configuration
+    const ahd = new (AHDjs as any)(undefined, {
       applicationId: "6a0bb067afcee1355c1b6c59",
       apiHost: "https://pagepilot.fabbuilder.com",
       visitorId: "visitor-id",
@@ -99,10 +100,10 @@ function AHDjsTourInitializer() {
     });
 
     // Load the site map for the tour
-    AHDjs.initializeSiteMap();
+    ahd.initializeSiteMap();
 
-    // Show highlights for the target page (e.g., after a short delay to let DOM settle)
-    AHDjs.showHighlights("target-page", true);
+    // Show highlights for the target page
+    ahd.showHighlights("target-page", true);
   }, []);
 
   return null;
