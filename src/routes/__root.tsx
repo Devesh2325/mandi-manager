@@ -78,6 +78,36 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Initializes the AHDjs tour library once when the app loads.
+ * Sets up the site map and starts highlighting the target page.
+ */
+function AHDjsTourInitializer() {
+  const initialized = useRef(false);
+
+  useEffect(() => {
+    // Ensure initialization happens only once
+    if (initialized.current) return;
+    initialized.current = true;
+
+    // Initialize AHDjs with the provided configuration
+    AHDjs.init({
+      applicationId: "6a0bb067afcee1355c1b6c59",
+      apiHost: "https://pagepilot.fabbuilder.com",
+      visitorId: "visitor-id",
+      showProgressbar: false,
+    });
+
+    // Load the site map for the tour
+    AHDjs.initializeSiteMap();
+
+    // Show highlights for the target page (e.g., after a short delay to let DOM settle)
+    AHDjs.showHighlights("target-page", true);
+  }, []);
+
+  return null;
+}
+
 function RootComponent() {
   return (
     <TenantProvider>
