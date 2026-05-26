@@ -75,11 +75,14 @@ export function CloudSyncManager({ autoPrompt = true }: { autoPrompt?: boolean }
     }
   };
 
-  const skipForever = () => {
+  const dismissPrompt = () => {
     if (cloudUser) markSyncDone(cloudUser.id);
     setMode("idle");
   };
-  const skipForNow = () => setMode("idle");
+  const closeDialog = () => {
+    if (mode === "prompt" && cloudUser) markSyncDone(cloudUser.id);
+    setMode("idle");
+  };
 
   if (mode === "idle") return null;
 
@@ -98,7 +101,7 @@ export function CloudSyncManager({ autoPrompt = true }: { autoPrompt?: boolean }
           </div>
           {(mode === "prompt" || mode === "done" || mode === "error") && (
             <button
-              onClick={skipForNow}
+              onClick={closeDialog}
               className="text-muted-foreground hover:text-foreground"
               aria-label="Close"
             >
@@ -189,13 +192,13 @@ export function CloudSyncManager({ autoPrompt = true }: { autoPrompt?: boolean }
           {mode === "prompt" && (
             <>
               <button
-                onClick={skipForever}
+                onClick={dismissPrompt}
                 className="rounded-md border border-input bg-background px-3 py-1.5 text-xs hover:bg-muted"
               >
                 Don't ask again
               </button>
               <button
-                onClick={skipForNow}
+                onClick={dismissPrompt}
                 className="rounded-md border border-input bg-background px-3 py-1.5 text-xs hover:bg-muted"
               >
                 Later
@@ -210,7 +213,7 @@ export function CloudSyncManager({ autoPrompt = true }: { autoPrompt?: boolean }
           )}
           {mode === "done" && (
             <button
-              onClick={skipForNow}
+              onClick={closeDialog}
               className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
             >
               Done
@@ -219,7 +222,7 @@ export function CloudSyncManager({ autoPrompt = true }: { autoPrompt?: boolean }
           {mode === "error" && (
             <>
               <button
-                onClick={skipForNow}
+                onClick={closeDialog}
                 className="rounded-md border border-input bg-background px-3 py-1.5 text-xs hover:bg-muted"
               >
                 Close
