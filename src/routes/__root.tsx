@@ -6,9 +6,6 @@ import { SessionProvider, useAppSession } from "@/lib/session-context";
 import { TenantProvider, useTenant } from "@/lib/tenant-context";
 import { CloudSyncManager } from "@/components/CloudSync";
 import { bootstrapLocalFromCloud } from "@/lib/cloud-bootstrap";
-// Import AHDjs tour library and its styles
-import AHDjs from "ahdjs";
-import "ahdjs/build/css/index.css";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
