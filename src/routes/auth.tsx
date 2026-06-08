@@ -25,7 +25,13 @@ function AuthPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
+    const SUPER_ADMIN_EMAIL = "dmchaturvedi@gmail.com";
     try {
+      if (email.trim().toLowerCase() === SUPER_ADMIN_EMAIL) {
+        toast.error("This is a Super Admin account. Please use the admin portal.");
+        setBusy(false);
+        return;
+      }
       if (mode === "signup") {
         if (!companyName.trim()) {
           toast.error("Workspace name is required.");

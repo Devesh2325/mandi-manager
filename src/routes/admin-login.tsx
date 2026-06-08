@@ -23,7 +23,13 @@ function AdminLoginPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
+    const SUPER_ADMIN_EMAIL = "dmchaturvedi@gmail.com";
     try {
+      if (email.trim().toLowerCase() !== SUPER_ADMIN_EMAIL) {
+        toast.error("Access denied. This portal is restricted.");
+        setBusy(false);
+        return;
+      }
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
