@@ -701,13 +701,20 @@ function ChallanEntryPage() {
 
               <div>
                 <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buyer-side Expenses</div>
-                {totals.buyerExp.length === 0 && <div className="text-xs italic text-muted-foreground">—</div>}
-                {totals.buyerExp.map((e, i) => (
-                  <div key={i} className="flex justify-between text-xs">
-                    <span>{e.name}</span>
-                    <span className="tabular text-debit">+{fmtINR(e.amount)}</span>
+                {expenseMasters.filter((m) => m.applyOn === "buyer" || m.applyOn === "both").length === 0 ? (
+                  <div className="rounded border border-dashed border-border bg-muted/30 p-2 text-[11px] italic text-muted-foreground">
+                    No buyer-side expense master configured. Add one in <span className="font-semibold">Masters → Expenses</span> with Apply On = Buyer (or Both).
                   </div>
-                ))}
+                ) : totals.buyerExp.length === 0 ? (
+                  <div className="text-xs italic text-muted-foreground">— (no sale entered yet)</div>
+                ) : (
+                  totals.buyerExp.map((e, i) => (
+                    <div key={i} className="flex justify-between text-xs">
+                      <span>{e.name}</span>
+                      <span className="tabular text-debit">+{fmtINR(e.amount)}</span>
+                    </div>
+                  ))
+                )}
                 <Row label="Buyer Total Payable" value={fmtINR(totals.netBuyer)} bold accent="debit" />
               </div>
             </div>
