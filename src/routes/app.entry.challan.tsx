@@ -724,6 +724,43 @@ function ChallanEntryPage() {
                 </div>
               </div>
             ))}
+
+            {/* Friendly footer: big add button + per-quality quick chips */}
+            <div className="mt-2 flex flex-col gap-2 rounded border border-dashed border-border bg-muted/20 p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={addRow}
+                  className="inline-flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Another Quality Row
+                </button>
+                <span className="text-[11px] text-muted-foreground">or quick-add by quality:</span>
+                {qualities
+                  .filter((q) => !q.itemId || q.itemId === Number(itemId))
+                  .map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() =>
+                        setRows((r) => [
+                          ...r,
+                          { id: uid(), qualityId: q.id, lotNo: makeLot(r.length + 1), qty: 0, sales: [], matrix: {} },
+                        ])
+                      }
+                      className="inline-flex items-center gap-1 rounded-full border border-input bg-background px-2.5 py-0.5 text-[11px] font-medium hover:border-primary hover:bg-primary/5 hover:text-primary"
+                    >
+                      <Plus className="h-2.5 w-2.5" /> {q.name}
+                    </button>
+                  ))}
+                {qualities.length === 0 && (
+                  <span className="text-[11px] italic text-muted-foreground">
+                    No qualities configured — add in Masters → Items
+                  </span>
+                )}
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                Tip: press <kbd className="rounded border border-input bg-background px-1">Ctrl</kbd>+<kbd className="rounded border border-input bg-background px-1">Enter</kbd> to add a blank row, or click <Copy className="inline h-3 w-3" /> on any row to duplicate it.
+              </div>
+            </div>
           </Section>
 
           <Section title="Notes">
