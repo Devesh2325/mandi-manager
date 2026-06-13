@@ -114,7 +114,54 @@ function ChallanEntryPage() {
   };
 
   // Row actions
-  const addRow = () => setRows((r) => [...r, { id: uid(), lotNo: "", qty: 0, sales: [], matrix: {} }]);
+  const makeLot = (n: number) => {
+    const farmer = farmers.find((f) => f.id === farmerId);
+    const code = farmer?.shortCode ?? "LOT";
+    return `${date.replace(/-/g, "").slice(4)}-${code}-${n}`;
+  };
+  const addRow = () =>
+    setRows((r) => [...r, { id: uid(), lotNo: makeLot(r.length + 1), qty: 0, sales: [], matrix: {} }]);
+  const duplicateRow = (id: string) =>
+    setRows((r) => {
+      const src = r.find((x) => x.id === id);
+      if (!src) return r;
+      const idx = r.findIndex((x) => x.id === id);
+      const clone: QualityRow = {
+        ...src,
+        id: uid(),
+        lotNo: makeLot(r.length + 1),
+        sales: [],
+        matrix: { ...(src.matrix ?? {}) },
+      };
+      const next = [...r];
+      next.splice(idx + 1, 0, clone);
+      return next;
+    });
+  const addRowsForAllQualities = () => {
+    if (qualities.length === 0) {
+      toast.info("No qualities configured", { description: "Add qualities in Masters → Items first." });
+      return;
+    }
+    const itemQs = qualities.filter((q) => !q.itemId || q.itemId === Number(itemId));
+    setRows((r) => {
+      const existingQ = new Set(r.map((x) => x.qualityId).filter(Boolean));
+      const newOnes = itemQs
+        .filter((q) => !existingQ.has(q.id))
+        .map((q, i) => ({
+          id: uid(),
+          qualityId: q.id,
+          lotNo: makeLot(r.length + i + 1),
+          qty: 0,
+          sales: [],
+          matrix: {},
+        }));
+      // Replace a single blank row with the new set, otherwise append
+      if (r.length === 1 && !r[0].qty && !r[0].qualityId && r[0].sales.length === 0) {
+        return newOnes.length ? newOnes : r;
+      }
+      return [...r, ...newOnes];
+    });
+  };
   const delRow = (id: string) => setRows((r) => r.filter((x) => x.id !== id));
   const updateRow = (id: string, patch: Partial<QualityRow>) =>
     setRows((r) => r.map((row) => (row.id === id ? { ...row, ...patch } : row)));
