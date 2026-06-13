@@ -547,7 +547,8 @@ function ChallanEntryPage() {
                         {fmtQty(row.qty - row.sales.reduce((a, b) => a + (Number(b.qty) || 0), 0))}
                       </span>
                     </div>
-                    <button onClick={() => delRow(row.id)} className="rounded p-1 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => duplicateRow(row.id)} title="Duplicate this row" className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><Copy className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => delRow(row.id)} title="Delete row" className="rounded p-1 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </div>
 
