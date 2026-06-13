@@ -170,8 +170,10 @@ export interface Challan {
   partyCd?: string; // Party Cd — quick cash-party code
   itemId: number;
   totalQty: number;
-  fullPacks?: number; // Full packs
-  halfPacks?: number; // Half packs
+  fullPacks?: number; // Full packs (total)
+  halfPacks?: number; // Half packs (total)
+  /** Per-size Full/Half pack breakdown keyed by sizeId */
+  packMatrix?: Record<string, { full: number; half: number }>;
   netWt?: number; // nwt — net weight
   isCashSale?: boolean; // CASH SALE flag
   qtyMatch?: boolean; // Qty Match toggle
