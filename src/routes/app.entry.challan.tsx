@@ -7,7 +7,7 @@ import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
 import { fmtINR, fmtQty, todayISO } from "@/lib/format";
 import { computeExpenses, round2 } from "@/lib/calc";
-import { Plus, Trash2, Save, X, UserPlus, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Save, X, UserPlus, AlertCircle, Copy, Layers } from "lucide-react";
 import { PartyEditor, generateShortCode } from "./app.masters.parties";
 
 export const Route = createFileRoute("/app/entry/challan")({
