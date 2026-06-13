@@ -7,7 +7,7 @@ import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
 import { fmtINR, fmtQty, todayISO } from "@/lib/format";
 import { computeExpenses, round2 } from "@/lib/calc";
-import { Plus, Trash2, Save, X, UserPlus, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Save, X, UserPlus, AlertCircle, Copy, Layers } from "lucide-react";
 import { PartyEditor, generateShortCode } from "./app.masters.parties";
 
 export const Route = createFileRoute("/app/entry/challan")({
@@ -114,7 +114,54 @@ function ChallanEntryPage() {
   };
 
   // Row actions
-  const addRow = () => setRows((r) => [...r, { id: uid(), lotNo: "", qty: 0, sales: [], matrix: {} }]);
+  const makeLot = (n: number) => {
+    const farmer = farmers.find((f) => f.id === farmerId);
+    const code = farmer?.shortCode ?? "LOT";
+    return `${date.replace(/-/g, "").slice(4)}-${code}-${n}`;
+  };
+  const addRow = () =>
+    setRows((r) => [...r, { id: uid(), lotNo: makeLot(r.length + 1), qty: 0, sales: [], matrix: {} }]);
+  const duplicateRow = (id: string) =>
+    setRows((r) => {
+      const src = r.find((x) => x.id === id);
+      if (!src) return r;
+      const idx = r.findIndex((x) => x.id === id);
+      const clone: QualityRow = {
+        ...src,
+        id: uid(),
+        lotNo: makeLot(r.length + 1),
+        sales: [],
+        matrix: { ...(src.matrix ?? {}) },
+      };
+      const next = [...r];
+      next.splice(idx + 1, 0, clone);
+      return next;
+    });
+  const addRowsForAllQualities = () => {
+    if (qualities.length === 0) {
+      toast.info("No qualities configured", { description: "Add qualities in Masters → Items first." });
+      return;
+    }
+    const itemQs = qualities.filter((q) => !q.itemId || q.itemId === Number(itemId));
+    setRows((r) => {
+      const existingQ = new Set(r.map((x) => x.qualityId).filter(Boolean));
+      const newOnes = itemQs
+        .filter((q) => !existingQ.has(q.id))
+        .map((q, i) => ({
+          id: uid(),
+          qualityId: q.id,
+          lotNo: makeLot(r.length + i + 1),
+          qty: 0,
+          sales: [],
+          matrix: {},
+        }));
+      // Replace a single blank row with the new set, otherwise append
+      if (r.length === 1 && !r[0].qty && !r[0].qualityId && r[0].sales.length === 0) {
+        return newOnes.length ? newOnes : r;
+      }
+      return [...r, ...newOnes];
+    });
+  };
   const delRow = (id: string) => setRows((r) => r.filter((x) => x.id !== id));
   const updateRow = (id: string, patch: Partial<QualityRow>) =>
     setRows((r) => r.map((row) => (row.id === id ? { ...row, ...patch } : row)));
@@ -453,7 +500,20 @@ function ChallanEntryPage() {
           {/* Section B + D: Multi quality with inline buyers */}
           <Section
             title="B · Quality Rows  ·  D · Inline Buyer Sale"
-            action={<button onClick={addRow} className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/20"><Plus className="h-3 w-3" /> Add Quality Row (Ctrl+Enter)</button>}
+            action={
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={addRowsForAllQualities}
+                  title="Add one row per configured quality"
+                  className="inline-flex items-center gap-1 rounded border border-input bg-background px-2 py-1 text-xs font-medium hover:bg-muted"
+                >
+                  <Layers className="h-3 w-3" /> Add All Qualities
+                </button>
+                <button onClick={addRow} className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/20">
+                  <Plus className="h-3 w-3" /> Add Row (Ctrl+Enter)
+                </button>
+              </div>
+            }
           >
             {rows.map((row, ri) => (
               <div key={row.id} className="mb-3 overflow-hidden rounded border border-border bg-card">
@@ -487,7 +547,8 @@ function ChallanEntryPage() {
                         {fmtQty(row.qty - row.sales.reduce((a, b) => a + (Number(b.qty) || 0), 0))}
                       </span>
                     </div>
-                    <button onClick={() => delRow(row.id)} className="rounded p-1 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => duplicateRow(row.id)} title="Duplicate this row" className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"><Copy className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => delRow(row.id)} title="Delete row" className="rounded p-1 text-destructive hover:bg-destructive/10"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </div>
 
@@ -663,6 +724,43 @@ function ChallanEntryPage() {
                 </div>
               </div>
             ))}
+
+            {/* Friendly footer: big add button + per-quality quick chips */}
+            <div className="mt-2 flex flex-col gap-2 rounded border border-dashed border-border bg-muted/20 p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={addRow}
+                  className="inline-flex items-center gap-1.5 rounded bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Another Quality Row
+                </button>
+                <span className="text-[11px] text-muted-foreground">or quick-add by quality:</span>
+                {qualities
+                  .filter((q) => !q.itemId || q.itemId === Number(itemId))
+                  .map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() =>
+                        setRows((r) => [
+                          ...r,
+                          { id: uid(), qualityId: q.id, lotNo: makeLot(r.length + 1), qty: 0, sales: [], matrix: {} },
+                        ])
+                      }
+                      className="inline-flex items-center gap-1 rounded-full border border-input bg-background px-2.5 py-0.5 text-[11px] font-medium hover:border-primary hover:bg-primary/5 hover:text-primary"
+                    >
+                      <Plus className="h-2.5 w-2.5" /> {q.name}
+                    </button>
+                  ))}
+                {qualities.length === 0 && (
+                  <span className="text-[11px] italic text-muted-foreground">
+                    No qualities configured — add in Masters → Items
+                  </span>
+                )}
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                Tip: press <kbd className="rounded border border-input bg-background px-1">Ctrl</kbd>+<kbd className="rounded border border-input bg-background px-1">Enter</kbd> to add a blank row, or click <Copy className="inline h-3 w-3" /> on any row to duplicate it.
+              </div>
+            </div>
           </Section>
 
           <Section title="Notes">
