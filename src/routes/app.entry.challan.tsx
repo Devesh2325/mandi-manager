@@ -295,18 +295,24 @@ function ChallanEntryPage() {
   canSaveRef.current = canSave;
   savingRef.current = saving;
   useEffect(() => {
+    // Cross-platform shortcuts. Ctrl+N is reserved by every browser (new window),
+    // so we use Ctrl/Cmd+Enter for "add quality row" instead.
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const key = e.key.toLowerCase();
+      if (key === "s") {
         e.preventDefault();
+        e.stopPropagation();
         if (canSaveRef.current && !savingRef.current) saveRef.current();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") {
+      } else if (key === "enter") {
         e.preventDefault();
+        e.stopPropagation();
         addRowRef.current();
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () => window.removeEventListener("keydown", onKey, { capture: true } as any);
   }, []);
 
   return (
