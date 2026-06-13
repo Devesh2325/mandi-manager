@@ -47,14 +47,10 @@ function ChallanEntryPage() {
   const [farmerId, setFarmerId] = useState<number | "">("");
   const [agentId, setAgentId] = useState<number | "">("");
   const [truckNo, setTruckNo] = useState("");
-  const [trGrNo, setTrGrNo] = useState("");
-  const [sender, setSender] = useState("");
-  const [partyCd, setPartyCd] = useState("");
   const [itemId, setItemId] = useState<number | "">("");
-  const [totalQty, setTotalQty] = useState<number>(0);
   const [fullPacks, setFullPacks] = useState<number>(0);
   const [halfPacks, setHalfPacks] = useState<number>(0);
-  const [netWt, setNetWt] = useState<number>(0);
+  const [packMatrix, setPackMatrix] = useState<Record<string, { full: number; half: number }>>({});
   const [isCashSale, setIsCashSale] = useState(false);
   const [qtyMatch, setQtyMatch] = useState(true);
   const [useSaleRate, setUseSaleRate] = useState(false);
@@ -194,14 +190,11 @@ function ChallanEntryPage() {
         farmerId: Number(farmerId),
         agentId: agentId ? Number(agentId) : undefined,
         truckNo,
-        trGrNo: trGrNo || undefined,
-        sender: sender || undefined,
-        partyCd: partyCd || undefined,
         itemId: Number(itemId),
-        totalQty: Number(totalQty) || totals.qty,
+        totalQty: totals.qty,
         fullPacks: Number(fullPacks) || undefined,
         halfPacks: Number(halfPacks) || undefined,
-        netWt: Number(netWt) || undefined,
+        packMatrix: Object.keys(packMatrix).length ? packMatrix : undefined,
         isCashSale: isCashSale || undefined,
         qtyMatch,
         useSaleRate,
@@ -302,18 +295,24 @@ function ChallanEntryPage() {
   canSaveRef.current = canSave;
   savingRef.current = saving;
   useEffect(() => {
+    // Cross-platform shortcuts. Ctrl+N is reserved by every browser (new window),
+    // so we use Ctrl/Cmd+Enter for "add quality row" instead.
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const key = e.key.toLowerCase();
+      if (key === "s") {
         e.preventDefault();
+        e.stopPropagation();
         if (canSaveRef.current && !savingRef.current) saveRef.current();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "n") {
+      } else if (key === "enter") {
         e.preventDefault();
+        e.stopPropagation();
         addRowRef.current();
       }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () => window.removeEventListener("keydown", onKey, { capture: true } as any);
   }, []);
 
   return (
@@ -352,7 +351,6 @@ function ChallanEntryPage() {
               <Field label="Challan #"><input value={challanNo} onChange={(e) => setChallanNo(e.target.value)} className="inp font-mono" /></Field>
               <Field label="Arrival Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
               <Field label="Sale Date (S-DT)"><input type="date" value={saleDate} onChange={(e) => setSaleDate(e.target.value)} className="inp" /></Field>
-              <Field label="Party Cd (cash)"><input value={partyCd} onChange={(e) => setPartyCd(e.target.value.toUpperCase())} className="inp font-mono uppercase" placeholder="—" /></Field>
               <Field label="Goods Type">
                 <select value={goodsType} onChange={(e) => { setGoodsType(e.target.value); setItemId(""); }} className="inp">
                   {goodsTypes.map((g) => <option key={g} value={g}>{g}</option>)}
@@ -375,21 +373,62 @@ function ChallanEntryPage() {
                 />
               </Field>
               <Field label="Truck No"><input value={truckNo} onChange={(e) => setTruckNo(e.target.value)} className="inp font-mono uppercase" placeholder="HR-55-1234" /></Field>
-              <Field label="TR / GR #"><input value={trGrNo} onChange={(e) => setTrGrNo(e.target.value)} className="inp font-mono" placeholder="89797" /></Field>
-              <Field label="Sender"><input value={sender} onChange={(e) => setSender(e.target.value)} className="inp" placeholder="9898" /></Field>
               <Field label="Item *">
                 <select value={itemId} onChange={(e) => setItemId(Number(e.target.value) || "")} className="inp">
                   <option value="">— Select item —</option>
                   {items.filter((i) => i.goodsType === goodsType).map((i) => <option key={i.id} value={i.id}>{i.name} ({i.unit})</option>)}
                 </select>
               </Field>
-              <Field label="Total Qty (TQty)">
-                <input type="number" value={totalQty || ""} onChange={(e) => setTotalQty(Number(e.target.value))} className="inp tabular text-right" placeholder={fmtQty(totals.qty)} />
-              </Field>
-              <Field label="Full Packs"><input type="number" value={fullPacks || ""} onChange={(e) => setFullPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
-              <Field label="Half Packs"><input type="number" value={halfPacks || ""} onChange={(e) => setHalfPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
-              <Field label="Net Wt (nwt)"><input type="number" value={netWt || ""} onChange={(e) => setNetWt(Number(e.target.value))} className="inp tabular text-right" /></Field>
+              <Field label="Full Packs (total)"><input type="number" value={fullPacks || ""} onChange={(e) => setFullPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
+              <Field label="Half Packs (total)"><input type="number" value={halfPacks || ""} onChange={(e) => setHalfPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
             </div>
+
+            {/* Per-size Full/Half breakdown */}
+            {sizes.length > 0 && (
+              <div className="mt-3 rounded border border-border bg-muted/20 p-2">
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Pack Breakdown by Size (optional)
+                </div>
+                <table className="grid-table">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
+                      <th className="num">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(["full", "half"] as const).map((kind) => {
+                      const total = sizes.reduce((a, s) => a + (Number(packMatrix[String(s.id)]?.[kind]) || 0), 0);
+                      return (
+                        <tr key={kind}>
+                          <td className="font-medium capitalize">{kind} Packs</td>
+                          {sizes.map((s) => {
+                            const key = String(s.id);
+                            return (
+                              <td key={s.id} className="num">
+                                <input
+                                  type="number"
+                                  className="grid-input text-right"
+                                  value={packMatrix[key]?.[kind] || ""}
+                                  onChange={(e) => {
+                                    setPackMatrix((m) => {
+                                      const cur = m[key] ?? { full: 0, half: 0 };
+                                      return { ...m, [key]: { ...cur, [kind]: Number(e.target.value) } };
+                                    });
+                                  }}
+                                />
+                              </td>
+                            );
+                          })}
+                          <td className="num tabular font-semibold">{total}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {/* Toggles row */}
             <div className="mt-3 flex flex-wrap items-center gap-4 rounded border border-border bg-muted/30 px-3 py-2 text-xs">
@@ -399,24 +438,22 @@ function ChallanEntryPage() {
               </label>
               <label className="inline-flex cursor-pointer items-center gap-1.5">
                 <input type="checkbox" checked={qtyMatch} onChange={(e) => setQtyMatch(e.target.checked)} className="h-3.5 w-3.5" />
-                <span>Qty Match (TQty must equal sum of rows)</span>
+                <span>Qty Match (auto-summed from rows)</span>
               </label>
               <label className="inline-flex cursor-pointer items-center gap-1.5">
                 <input type="checkbox" checked={useSaleRate} onChange={(e) => setUseSaleRate(e.target.checked)} className="h-3.5 w-3.5" />
                 <span>Use Sale Rate (override matrix rates)</span>
               </label>
-              {qtyMatch && totalQty > 0 && totalQty !== totals.qty && (
-                <span className="rounded bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                  Mismatch: TQty {fmtQty(totalQty)} vs rows {fmtQty(totals.qty)}
-                </span>
-              )}
+              <span className="ml-auto text-[11px] text-muted-foreground">
+                Total Arrival Qty: <span className="tabular font-semibold text-foreground">{fmtQty(totals.qty)}</span>
+              </span>
             </div>
           </Section>
 
           {/* Section B + D: Multi quality with inline buyers */}
           <Section
             title="B · Quality Rows  ·  D · Inline Buyer Sale"
-            action={<button onClick={addRow} className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/20"><Plus className="h-3 w-3" /> Add Quality Row (Ctrl+N)</button>}
+            action={<button onClick={addRow} className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/20"><Plus className="h-3 w-3" /> Add Quality Row (Ctrl+Enter)</button>}
           >
             {rows.map((row, ri) => (
               <div key={row.id} className="mb-3 overflow-hidden rounded border border-border bg-card">
@@ -664,13 +701,20 @@ function ChallanEntryPage() {
 
               <div>
                 <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buyer-side Expenses</div>
-                {totals.buyerExp.length === 0 && <div className="text-xs italic text-muted-foreground">—</div>}
-                {totals.buyerExp.map((e, i) => (
-                  <div key={i} className="flex justify-between text-xs">
-                    <span>{e.name}</span>
-                    <span className="tabular text-debit">+{fmtINR(e.amount)}</span>
+                {expenseMasters.filter((m) => m.applyOn === "buyer" || m.applyOn === "both").length === 0 ? (
+                  <div className="rounded border border-dashed border-border bg-muted/30 p-2 text-[11px] italic text-muted-foreground">
+                    No buyer-side expense master configured. Add one in <span className="font-semibold">Masters → Expenses</span> with Apply On = Buyer (or Both).
                   </div>
-                ))}
+                ) : totals.buyerExp.length === 0 ? (
+                  <div className="text-xs italic text-muted-foreground">— (no sale entered yet)</div>
+                ) : (
+                  totals.buyerExp.map((e, i) => (
+                    <div key={i} className="flex justify-between text-xs">
+                      <span>{e.name}</span>
+                      <span className="tabular text-debit">+{fmtINR(e.amount)}</span>
+                    </div>
+                  ))
+                )}
                 <Row label="Buyer Total Payable" value={fmtINR(totals.netBuyer)} bold accent="debit" />
               </div>
             </div>
