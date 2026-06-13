@@ -500,7 +500,20 @@ function ChallanEntryPage() {
           {/* Section B + D: Multi quality with inline buyers */}
           <Section
             title="B · Quality Rows  ·  D · Inline Buyer Sale"
-            action={<button onClick={addRow} className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/20"><Plus className="h-3 w-3" /> Add Quality Row (Ctrl+Enter)</button>}
+            action={
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={addRowsForAllQualities}
+                  title="Add one row per configured quality"
+                  className="inline-flex items-center gap-1 rounded border border-input bg-background px-2 py-1 text-xs font-medium hover:bg-muted"
+                >
+                  <Layers className="h-3 w-3" /> Add All Qualities
+                </button>
+                <button onClick={addRow} className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-xs font-semibold text-primary hover:bg-primary/20">
+                  <Plus className="h-3 w-3" /> Add Row (Ctrl+Enter)
+                </button>
+              </div>
+            }
           >
             {rows.map((row, ri) => (
               <div key={row.id} className="mb-3 overflow-hidden rounded border border-border bg-card">
