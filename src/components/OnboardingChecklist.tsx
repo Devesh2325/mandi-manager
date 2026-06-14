@@ -24,7 +24,7 @@ export function OnboardingChecklist() {
     [companyId, yearId, ready],
   ) ?? 0;
   const expenses = useLiveQuery(
-    async () => (ready ? await db.expenseMasters?.where({ companyId, yearId }).count() ?? 0 : 0),
+    async () => (ready ? await db.expenseAccounts.where({ companyId, yearId }).count() : 0),
     [companyId, yearId, ready],
   ) ?? 0;
   const challans = useLiveQuery(
