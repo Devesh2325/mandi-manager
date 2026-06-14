@@ -5,6 +5,8 @@ import { RouteLoader } from "@/components/RouteLoader";
 import { SessionProvider, useAppSession } from "@/lib/session-context";
 import { TenantProvider, useTenant } from "@/lib/tenant-context";
 import { CloudSyncManager } from "@/components/CloudSync";
+import { CommandPalette } from "@/components/CommandPalette";
+import { ShortcutsHelp } from "@/components/ShortcutsHelp";
 import { bootstrapLocalFromCloud } from "@/lib/cloud-bootstrap";
 import appCss from "../styles.css?url";
 
@@ -124,6 +126,8 @@ function RootComponent() {
         <RouteGuard />
         <Outlet />
         <CloudSyncManager />
+        <CommandPalette />
+        <ShortcutsHelp />
         <Toaster richColors position="top-right" />
       </SessionProvider>
     </TenantProvider>

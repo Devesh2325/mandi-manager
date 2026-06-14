@@ -6,6 +6,7 @@ import { useScope } from "@/lib/session-context";
 import { fmtINR, fmtQty } from "@/lib/format";
 import { Truck, Package, IndianRupee, Users, FileText, ArrowUpRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 
 export const Route = createFileRoute("/app/")({
   component: Dashboard,
@@ -41,6 +42,7 @@ function Dashboard() {
     <>
       <TopBar title="Dashboard" />
       <div id="tour-dashboard" data-tour="dashboard" className="flex-1 overflow-auto p-6 space-y-6">
+        <OnboardingChecklist />
         <div id="tour-kpis" data-tour="kpis" className="grid grid-cols-2 gap-5 lg:grid-cols-4">
           <KPI tourId="tour-kpi-arrivals" icon={Truck} label="Today's Arrivals" value={`${todayChallans.length}`} sub={`${fmtQty(todayQty)} qty`} />
           <KPI tourId="tour-kpi-teeps" icon={FileText} label="Today's Teeps" value={`${todayTeeps.length}`} sub={`${fmtINR(todaySales)} gross`} />
