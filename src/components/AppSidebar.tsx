@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 interface NavItem {
   label: string;
+  hindi?: string;
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   shortcut?: string;
@@ -36,50 +37,50 @@ interface NavGroup {
 const groups: NavGroup[] = [
   {
     label: "Workspace",
-    items: [{ label: "Dashboard", to: "/app", icon: LayoutDashboard, shortcut: "F1" }],
+    items: [{ label: "Dashboard", hindi: "डैशबोर्ड", to: "/app", icon: LayoutDashboard, shortcut: "F1" }],
   },
   {
-    label: "Entry",
+    label: "Entry / प्रवेश",
     items: [
-      { label: "Challan Entry", to: "/app/entry/challan", icon: Truck, shortcut: "F2", requires: "entry" },
-      { label: "Stock Sale", to: "/app/stock/sale", icon: Receipt, shortcut: "F4", requires: "entry" },
-      { label: "Voucher (Pay/Recv)", to: "/app/entry/voucher", icon: Receipt, shortcut: "F3", requires: "voucher" },
+      { label: "Challan Entry", hindi: "चालान", to: "/app/entry/challan", icon: Truck, shortcut: "F2", requires: "entry" },
+      { label: "Stock Sale", hindi: "बिक्री", to: "/app/stock/sale", icon: Receipt, shortcut: "F4", requires: "entry" },
+      { label: "Voucher (Pay/Recv)", hindi: "भुगतान / प्राप्ति", to: "/app/entry/voucher", icon: Receipt, shortcut: "F3", requires: "voucher" },
     ],
   },
   {
-    label: "Stock & Sales",
+    label: "Stock & Sales / स्टॉक",
     items: [
-      { label: "Stock Register", to: "/app/stock", icon: Package },
-      { label: "Teep (Sale Reg.)", to: "/app/teep", icon: FileText },
+      { label: "Stock Register", hindi: "स्टॉक रजिस्टर", to: "/app/stock", icon: Package },
+      { label: "Teep (Sale Reg.)", hindi: "टीप रजिस्टर", to: "/app/teep", icon: FileText },
     ],
   },
   {
-    label: "Accounting",
+    label: "Accounting / लेखा",
     items: [
-      { label: "Ledger", to: "/app/ledger", icon: BookOpen },
-      { label: "Cash Book", to: "/app/cashbook", icon: BookOpen },
-      { label: "Trial Balance", to: "/app/trial-balance", icon: BookOpen },
+      { label: "Ledger", hindi: "खाता", to: "/app/ledger", icon: BookOpen },
+      { label: "Cash Book", hindi: "रोकड़ बही", to: "/app/cashbook", icon: BookOpen },
+      { label: "Trial Balance", hindi: "ट्रायल बैलेंस", to: "/app/trial-balance", icon: BookOpen },
     ],
   },
   {
-    label: "Bills & Reports",
+    label: "Bills & Reports / बिल",
     items: [
-      { label: "Bills", to: "/app/bills", icon: FileText },
-      { label: "Reports", to: "/app/reports", icon: FileText },
+      { label: "Bills", hindi: "बिल", to: "/app/bills", icon: FileText },
+      { label: "Reports", hindi: "रिपोर्ट", to: "/app/reports", icon: FileText },
     ],
   },
   {
-    label: "Masters",
+    label: "Masters / मास्टर",
     items: [
-      { label: "Parties", to: "/app/masters/parties", icon: Users, requires: "manageMasters" },
-      { label: "Items / Quality / Size", to: "/app/masters/items", icon: Package, requires: "manageMasters" },
-      { label: "Expenses & Packing", to: "/app/masters/expenses", icon: Settings, requires: "manageMasters" },
+      { label: "Parties", hindi: "किसान / खरीदार", to: "/app/masters/parties", icon: Users, requires: "manageMasters" },
+      { label: "Items / Quality / Size", hindi: "आइटम / क्वालिटी", to: "/app/masters/items", icon: Package, requires: "manageMasters" },
+      { label: "Expenses & Packing", hindi: "खर्च / पैकिंग", to: "/app/masters/expenses", icon: Settings, requires: "manageMasters" },
     ],
   },
   {
     label: "Admin",
     items: [
-      { label: "Settings & Users", to: "/app/settings", icon: Settings, requires: "settings" },
+      { label: "Settings & Users", hindi: "सेटिंग्स", to: "/app/settings", icon: Settings, requires: "settings" },
       { label: "Buy plan", to: "/app/pricing", icon: Sparkles },
     ],
   },
