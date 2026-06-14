@@ -180,9 +180,16 @@ export function AppSidebar() {
                         : "text-muted-foreground hover:bg-card/60 hover:text-foreground",
                     )}
                   >
-                    <span className="flex items-center gap-3 truncate">
+                    <span className="flex min-w-0 items-center gap-3 truncate">
                       <Icon className={cn("h-4 w-4 shrink-0", active && "text-primary")} />
-                      <span className="truncate">{item.label}</span>
+                      <span className="min-w-0 truncate">
+                        <span className="block truncate leading-tight">{item.label}</span>
+                        {item.hindi && (
+                          <span className="block truncate text-[10px] font-normal leading-tight text-muted-foreground/80">
+                            {item.hindi}
+                          </span>
+                        )}
+                      </span>
                     </span>
                     {item.shortcut && (
                       <span className="rounded-md bg-muted px-1.5 py-0.5 text-[9px] font-semibold text-muted-foreground">
