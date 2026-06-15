@@ -6,10 +6,10 @@ import { useAppSession } from "@/lib/session-context";
 import { useTenant } from "@/lib/tenant-context";
 import { TopBar } from "@/components/TopBar";
 import { CloudSyncButton } from "@/components/CloudSync";
-import { buildBrandedPdf, openPdfPrint } from "@/lib/pdf";
+import { buildBrandedPdf, downloadPdf } from "@/lib/pdf";
 import {
   Building2, Image as ImageIcon, Save, Upload, Trash2, Users, UserPlus,
-  Eye, FileText, ShieldCheck, ShieldAlert, Cloud,
+  Eye, FileText, ShieldCheck, ShieldAlert, Cloud, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -117,6 +117,7 @@ function CompanyProfileCard() {
     logoDataUrl: undefined as string | undefined,
   });
   const [saving, setSaving] = useState(false);
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
 
   useEffect(() => {
     if (!company) return;
@@ -163,8 +164,7 @@ function CompanyProfileCard() {
     }
   };
 
-  const previewPdf = () => {
-    const sample = buildBrandedPdf({
+  const buildPreviewPdf = () => buildBrandedPdf({
       company: { ...(company ?? { id: 0, createdAt: 0, name: "", shortCode: "" }), ...form },
       year: null,
       title: "Sample Report Header Preview",
@@ -180,7 +180,23 @@ function CompanyProfileCard() {
         ["2", "Sample line two", "20.00", "₹ 2,500.00"],
       ],
     });
-    openPdfPrint(sample);
+
+  const previewPdf = () => {
+    try {
+      setPreviewSrc(buildPreviewPdf().output("datauristring"));
+    } catch (e) {
+      toast.error("Preview failed");
+      console.error(e);
+    }
+  };
+
+  const downloadPreviewPdf = () => {
+    try {
+      downloadPdf(buildPreviewPdf(), "sample-report-header-preview.pdf");
+    } catch (e) {
+      toast.error("PDF download failed");
+      console.error(e);
+    }
   };
 
   return (
@@ -258,6 +274,38 @@ function CompanyProfileCard() {
           <Save className="h-3.5 w-3.5" /> {saving ? "Saving…" : "Save profile"}
         </button>
       </footer>
+
+      {previewSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
+          <div className="flex h-[min(88vh,760px)] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+            <header className="flex items-center justify-between border-b border-border px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold">PDF header preview</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={downloadPreviewPdf}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                >
+                  <Download className="h-3.5 w-3.5" /> Download
+                </button>
+                <button
+                  onClick={() => setPreviewSrc(null)}
+                  className="rounded-md border border-input px-3 py-1.5 text-xs hover:bg-muted"
+                >
+                  Close
+                </button>
+              </div>
+            </header>
+            <iframe
+              title="PDF header preview"
+              src={previewSrc}
+              className="h-full w-full bg-background"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 }
