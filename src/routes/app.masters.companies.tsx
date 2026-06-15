@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState } from "react";
-import { db, seedMasters, ensureCompanyHasYear, type Company, type FinancialYear } from "@/lib/db";
+import { db, ensureCompanyHasYear, type Company, type FinancialYear } from "@/lib/db";
 import { useAppSession } from "@/lib/session-context";
 import { useTenant } from "@/lib/tenant-context";
 import { Plus, Trash2, Pencil, Building2, CalendarRange, CheckCircle2 } from "lucide-react";
@@ -74,8 +74,7 @@ function CompaniesPage() {
     if (editingFy.id) {
       await db.financialYears.update(editingFy.id, data);
     } else {
-      const newId = await db.financialYears.add(data);
-      await seedMasters(selectedCompanyId, newId);
+      await db.financialYears.add(data);
     }
     setEditingFy(null);
   };
