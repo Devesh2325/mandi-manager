@@ -387,7 +387,7 @@ export async function seedIfEmpty() {
       endDate: "2025-03-31",
     });
 
-    // Seed masters for first company+year
+    // Seed masters for first company+year (offline demo only)
     await seedMasters(cId, yId);
   }
 }
@@ -467,13 +467,19 @@ export async function seedMasters(companyId: number, yearId: number) {
 }
 
 /**
- * Create a default financial year for a brand-new company and seed its masters.
- * Used when the user creates a new company so it isn't blank.
+ * Create a default financial year for a brand-new company.
+ *
+ * IMPORTANT: For cloud signups we keep the workspace COMPLETELY EMPTY —
+ * the user configures their own parties, items, expenses etc. from Masters.
+ * Pass `seedDemo: true` only for the offline demo company.
  */
-export async function ensureCompanyHasYear(companyId: number): Promise<number> {
+export async function ensureCompanyHasYear(
+  companyId: number,
+  opts: { seedDemo?: boolean } = {},
+): Promise<number> {
   const existing = await db.financialYears.where("companyId").equals(companyId).first();
   if (existing?.id) {
-    await seedMasters(companyId, existing.id);
+    if (opts.seedDemo) await seedMasters(companyId, existing.id);
     return existing.id;
   }
   // Auto-build a current FY (Apr → Mar India fiscal)
@@ -487,7 +493,8 @@ export async function ensureCompanyHasYear(companyId: number): Promise<number> {
     startDate: `${startYear}-04-01`,
     endDate: `${startYear + 1}-03-31`,
   });
-  await seedMasters(companyId, yearId);
+  if (opts.seedDemo) await seedMasters(companyId, yearId);
   return yearId;
 }
+
 

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { db, seedIfEmpty, seedMasters, type Company, type FinancialYear } from "./db";
+import { db, seedIfEmpty, type Company, type FinancialYear } from "./db";
 import { getSession, setSession, type Session } from "./session";
 
 interface Ctx {
@@ -61,7 +61,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setSess(next);
     setCompany((await db.companies.get(companyId)) ?? null);
     setYear((await db.financialYears.get(yearId)) ?? null);
-    await seedMasters(companyId, yearId);
+    // No auto-seed: workspace stays clean; user configures masters manually.
   };
 
   return (

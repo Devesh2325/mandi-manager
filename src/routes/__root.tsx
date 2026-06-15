@@ -77,43 +77,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-/**
- * Initializes the AHDjs tour library once when the app loads.
- * Creates an instance with the provided configuration, then loads
- * the site map and starts highlighting the target page.
- */
-function AHDjsTourInitializer() {
-  const initialized = useRef(false);
-
-  useEffect(() => {
-    // Ensure initialization happens only once, and only in the browser
-    if (initialized.current) return;
-    if (typeof window === "undefined") return;
-    initialized.current = true;
-
-    (async () => {
-      // Dynamically import AHDjs and its CSS on the client only
-      // (the package references `self` at module scope and breaks SSR)
-      const { default: AHDjs } = await import("ahdjs");
-      await import("ahdjs/build/css/index.css");
-
-      const ahd = new (AHDjs as any)(undefined, {
-        applicationId: "6a0bb067afcee1355c1b6c59",
-        apiHost: "https://pagepilot.fabbuilder.com",
-        visitorId: "visitor-id",
-        showProgressbar: false,
-      });
-
-      ahd.initializeSiteMap();
-      ahd.showHighlights("target-page", true);
-    })().catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error("AHDjs init failed", err);
-    });
-  }, []);
-
-  return null;
-}
+// (Removed third-party AHDjs/PagePilot tour: blocked by ad-blockers
+// — caused console "ERR_BLOCKED_BY_CLIENT" and SSR `self is not defined`.
+// Onboarding is handled in-app via the OnboardingChecklist on the Dashboard.)
 
 function RootComponent() {
   return (
@@ -122,10 +88,9 @@ function RootComponent() {
         <RouteLoader />
         <ImpersonationBanner />
         <CloudBootstrapper />
-        <AHDjsTourInitializer />
         <RouteGuard />
         <Outlet />
-        <CloudSyncManager />
+        <CloudSyncManager autoPrompt={false} />
         <CommandPalette />
         <ShortcutsHelp />
         <Toaster richColors position="top-right" />
