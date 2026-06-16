@@ -35,7 +35,12 @@ export type AppRole = "admin" | "operator" | "accountant" | "viewer";
 export interface User {
   id?: number;
   username: string;
-  password: string; // mock only
+  /**
+   * Legacy field — no longer used for authentication.
+   * Cloud auth (Supabase) is the only login path. We never store
+   * plaintext passwords. Left optional so existing rows still parse.
+   */
+  password?: string;
   name: string;
   role: AppRole;
   email?: string;
