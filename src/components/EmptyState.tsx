@@ -5,11 +5,14 @@ interface EmptyStateProps {
   icon?: React.ComponentType<{ className?: string }>;
   title: string;
   subtitle?: string;
-  cta?: { label: string; to: string };
+  hint?: string;
+  cta?: { label: string; to?: string; onClick?: () => void };
   className?: string;
 }
 
-export function EmptyState({ icon: Icon, title, subtitle, cta, className }: EmptyStateProps) {
+export function EmptyState({ icon: Icon, title, subtitle, hint, cta, className }: EmptyStateProps) {
+  const ctaClass =
+    "mt-1 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-pebble-sm hover:bg-primary/90";
   return (
     <div className={cn("flex flex-col items-center justify-center gap-3 px-6 py-12 text-center", className)}>
       {Icon && (
@@ -20,15 +23,13 @@ export function EmptyState({ icon: Icon, title, subtitle, cta, className }: Empt
       <div>
         <div className="text-base font-semibold text-foreground">{title}</div>
         {subtitle && <div className="mt-1 text-sm text-muted-foreground">{subtitle}</div>}
+        {hint && <div className="mt-0.5 text-xs text-muted-foreground/80">{hint}</div>}
       </div>
-      {cta && (
-        <Link
-          to={cta.to}
-          className="mt-1 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-pebble-sm hover:bg-primary/90"
-        >
-          {cta.label}
-        </Link>
-      )}
+      {cta && (cta.to ? (
+        <Link to={cta.to} className={ctaClass}>{cta.label}</Link>
+      ) : (
+        <button type="button" onClick={cta.onClick} className={ctaClass}>{cta.label}</button>
+      ))}
     </div>
   );
 }
