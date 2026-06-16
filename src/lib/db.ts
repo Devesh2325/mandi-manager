@@ -352,7 +352,8 @@ export async function seedIfEmpty() {
 
   // Legacy demo accounts have been removed. Cloud auth is the only
   // sign-in path; never seed plaintext-password users into IndexedDB.
-  void cloud;
+
+
 
 
   const companyCount = await db.companies.count();
