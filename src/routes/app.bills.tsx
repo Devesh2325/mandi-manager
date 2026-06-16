@@ -103,7 +103,7 @@ function BillsPage() {
                   </tr>
                 );
               })}
-              {buyerGroups.size === 0 && <tr><td colSpan={5} className="py-8 text-center text-muted-foreground">No bills yet.</td></tr>}
+              
             </tbody>
           </table>
         </div>
