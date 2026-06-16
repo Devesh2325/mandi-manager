@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
 import { PdfActions } from "@/components/PdfActions";
+import { EmptyState } from "@/components/EmptyState";
 import { fmtINR, fmtQty } from "@/lib/format";
 import { FileText, Printer } from "lucide-react";
 
