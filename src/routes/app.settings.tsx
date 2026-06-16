@@ -518,7 +518,7 @@ function InviteDialog({ onClose }: { onClose: () => void }) {
         <div className="grid grid-cols-2 gap-3 p-4">
           <Field label="Full name *" value={form.name} onChange={(v) => setForm((s) => ({ ...s, name: v }))} colSpan />
           <Field label="Username *" value={form.username} onChange={(v) => setForm((s) => ({ ...s, username: v.toLowerCase() }))} />
-          <Field label="Initial password *" value={form.password} onChange={(v) => setForm((s) => ({ ...s, password: v }))} />
+          <Field label="Mobile" value={form.mobile} onChange={(v) => setForm((s) => ({ ...s, mobile: v }))} />
           <Field label="Mobile" value={form.mobile} onChange={(v) => setForm((s) => ({ ...s, mobile: v }))} />
           <Field label="Email" value={form.email} onChange={(v) => setForm((s) => ({ ...s, email: v }))} />
           <label className="col-span-2">
