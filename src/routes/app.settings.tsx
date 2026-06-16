@@ -519,7 +519,7 @@ function InviteDialog({ onClose }: { onClose: () => void }) {
           <Field label="Full name *" value={form.name} onChange={(v) => setForm((s) => ({ ...s, name: v }))} colSpan />
           <Field label="Username *" value={form.username} onChange={(v) => setForm((s) => ({ ...s, username: v.toLowerCase() }))} />
           <Field label="Mobile" value={form.mobile} onChange={(v) => setForm((s) => ({ ...s, mobile: v }))} />
-          <Field label="Mobile" value={form.mobile} onChange={(v) => setForm((s) => ({ ...s, mobile: v }))} />
+
           <Field label="Email" value={form.email} onChange={(v) => setForm((s) => ({ ...s, email: v }))} />
           <label className="col-span-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Role</span>
