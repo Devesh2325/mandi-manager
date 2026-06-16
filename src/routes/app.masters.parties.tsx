@@ -78,42 +78,63 @@ function PartiesPage() {
         </button>
       </div>
 
-      <div className="overflow-auto rounded border border-border bg-card">
-        <table className="grid-table">
-          <thead>
-            <tr>
-              <th>Code</th><th>Name</th><th>Type</th><th>Mobile</th><th>Village/City</th>
-              <th className="num">Opening</th><th>Type</th><th className="num">Credit Limit</th><th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 && (
-              <tr><td colSpan={9} className="py-8 text-center text-muted-foreground">No parties found.</td></tr>
-            )}
-            {filtered.map((p) => (
-              <tr key={p.id}>
-                <td className="font-mono">{p.shortCode}</td>
-                <td className="font-medium">{p.name}</td>
-                <td><Pill type={p.type} /></td>
-                <td className="tabular">{p.mobile ?? "—"}</td>
-                <td>{p.village ?? p.city ?? "—"}</td>
-                <td className="num">{fmtINR(p.openingBalance)}</td>
-                <td><span className={p.openingType === "Dr" ? "text-debit" : "text-credit"}>{p.openingType}</span></td>
-                <td className="num">{p.creditLimit ? fmtINR(p.creditLimit) : "—"}</td>
-                <td>
-                  <div className="flex gap-1">
-                    <button onClick={() => setEditing(p)} className="rounded p-1 hover:bg-muted"><Pencil className="h-3 w-3" /></button>
-                    <button
-                      onClick={() => p.id && db.parties.delete(p.id)}
-                      className="rounded p-1 text-destructive hover:bg-muted"
-                    ><Trash2 className="h-3 w-3" /></button>
-                  </div>
-                </td>
+      {filtered.length === 0 ? (
+        parties.length === 0 ? (
+          <div className="rounded border border-dashed border-border bg-card">
+            <EmptyState
+              icon={Users}
+              title="No parties yet"
+              subtitle="Add your farmers, buyers, agents — and any expense accounts you use."
+              hint="किसान, खरीदार और एजेंट यहाँ जोड़ें।"
+              cta={{
+                label: "+ Add your first party",
+                onClick: () => setEditing({ type: "buyer", openingType: "Dr", openingBalance: 0 }),
+              }}
+            />
+          </div>
+        ) : (
+          <div className="rounded border border-dashed border-border bg-card">
+            <EmptyState
+              title="No matches"
+              subtitle={`No parties match “${q}”${filter !== "all" ? ` in ${filter}s` : ""}.`}
+            />
+          </div>
+        )
+      ) : (
+        <div className="overflow-auto rounded border border-border bg-card">
+          <table className="grid-table">
+            <thead>
+              <tr>
+                <th>Code</th><th>Name</th><th>Type</th><th>Mobile</th><th>Village/City</th>
+                <th className="num">Opening</th><th>Type</th><th className="num">Credit Limit</th><th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {filtered.map((p) => (
+                <tr key={p.id}>
+                  <td className="font-mono">{p.shortCode}</td>
+                  <td className="font-medium">{p.name}</td>
+                  <td><Pill type={p.type} /></td>
+                  <td className="tabular">{p.mobile ?? "—"}</td>
+                  <td>{p.village ?? p.city ?? "—"}</td>
+                  <td className="num">{fmtINR(p.openingBalance)}</td>
+                  <td><span className={p.openingType === "Dr" ? "text-debit" : "text-credit"}>{p.openingType}</span></td>
+                  <td className="num">{p.creditLimit ? fmtINR(p.creditLimit) : "—"}</td>
+                  <td>
+                    <div className="flex gap-1">
+                      <button onClick={() => setEditing(p)} className="rounded p-1 hover:bg-muted"><Pencil className="h-3 w-3" /></button>
+                      <button
+                        onClick={() => p.id && db.parties.delete(p.id)}
+                        className="rounded p-1 text-destructive hover:bg-muted"
+                      ><Trash2 className="h-3 w-3" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {editing && <PartyEditor value={editing} onChange={setEditing} onSave={save} onClose={() => setEditing(null)} />}
     </div>
