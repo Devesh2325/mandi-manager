@@ -8,6 +8,7 @@ interface Ctx {
   company: Company | null;
   year: FinancialYear | null;
   ready: boolean;
+  /** @deprecated Legacy local sign-in removed. Cloud auth is the only path. */
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   selectContext: (companyId: number, yearId: number) => Promise<void>;
