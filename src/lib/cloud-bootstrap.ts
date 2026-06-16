@@ -30,7 +30,6 @@ export async function bootstrapLocalFromCloud(
   if (!localUser) {
     const id = await db.users.add({
       username,
-      password: cloudUser.id, // local-only, never used for cloud auth
       name: fullName,
       role: "admin" as AppRole,
       email: cloudUser.email ?? undefined,

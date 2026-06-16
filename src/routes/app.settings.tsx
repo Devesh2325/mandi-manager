@@ -471,13 +471,13 @@ function InviteDialog({ onClose }: { onClose: () => void }) {
   const { cloudUser } = useTenant();
   const ownerId = cloudUser?.id;
   const [form, setForm] = useState({
-    name: "", username: "", mobile: "", email: "", password: "", role: "operator" as AppRole,
+    name: "", username: "", mobile: "", email: "", role: "operator" as AppRole,
   });
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
-    if (!form.name.trim() || !form.username.trim() || !form.password.trim()) {
-      toast.error("Name, username and password are required");
+    if (!form.name.trim() || !form.username.trim()) {
+      toast.error("Name and username are required");
       return;
     }
     // Username uniqueness scoped to this workspace.
@@ -491,7 +491,6 @@ function InviteDialog({ onClose }: { onClose: () => void }) {
       await db.users.add({
         name: form.name.trim(),
         username: form.username.trim(),
-        password: form.password,
         role: form.role,
         mobile: form.mobile || undefined,
         email: form.email || undefined,
@@ -499,7 +498,7 @@ function InviteDialog({ onClose }: { onClose: () => void }) {
         invitedAt: Date.now(),
         cloudOwnerId: ownerId,
       });
-      toast.success(`Invited ${form.name} as ${form.role}. Share their login credentials.`);
+      toast.success(`Invited ${form.name} as ${form.role}. They sign in with their cloud account.`);
       onClose();
     } finally {
       setBusy(false);
@@ -519,8 +518,8 @@ function InviteDialog({ onClose }: { onClose: () => void }) {
         <div className="grid grid-cols-2 gap-3 p-4">
           <Field label="Full name *" value={form.name} onChange={(v) => setForm((s) => ({ ...s, name: v }))} colSpan />
           <Field label="Username *" value={form.username} onChange={(v) => setForm((s) => ({ ...s, username: v.toLowerCase() }))} />
-          <Field label="Initial password *" value={form.password} onChange={(v) => setForm((s) => ({ ...s, password: v }))} />
           <Field label="Mobile" value={form.mobile} onChange={(v) => setForm((s) => ({ ...s, mobile: v }))} />
+
           <Field label="Email" value={form.email} onChange={(v) => setForm((s) => ({ ...s, email: v }))} />
           <label className="col-span-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Role</span>
