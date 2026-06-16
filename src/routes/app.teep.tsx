@@ -58,32 +58,41 @@ function TeepPage() {
         }
       />
       <div className="p-4">
-        <div className="overflow-auto rounded border border-border bg-card">
-          <table className="grid-table">
-            <thead>
-              <tr><th>Date</th><th>Teep #</th><th>Buyer</th><th>Item</th><th>Quality</th><th className="num">Qty</th><th className="num">Rate</th><th className="num">Gross</th><th className="num">Expense</th><th className="num">Net</th></tr>
-            </thead>
-            <tbody>
-              {teeps.length === 0 && <tr><td colSpan={10} className="py-10 text-center text-muted-foreground">No teeps yet.</td></tr>}
-              {teeps.slice().reverse().map((t) => {
-                const exp = t.expenses.reduce((a, b) => a + b.amount, 0);
-                return (
-                  <tr key={t.id}>
-                    <td className="tabular">{t.date}</td>
-                    <td className="font-mono font-medium">{t.teepNo}</td>
-                    <td>{parties.find((p) => p.id === t.buyerId)?.name ?? "—"}</td>
-                    <td>{items.find((i) => i.id === t.itemId)?.name ?? "—"}</td>
-                    <td>{qualities.find((q) => q.id === t.qualityId)?.name ?? "—"}</td>
-                    <td className="num tabular">{fmtQty(t.qty)}</td>
-                    <td className="num tabular">{fmtINR(t.rate)}</td>
-                    <td className="num tabular">{fmtINR(t.gross)}</td>
-                    <td className="num tabular text-debit">{fmtINR(exp)}</td>
-                    <td className="num tabular font-semibold text-credit">{fmtINR(t.net)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            {teeps.length > 0 && (
+        {teeps.length === 0 ? (
+          <div className="rounded border border-dashed border-border bg-card">
+            <EmptyState
+              icon={FileText}
+              title="No teeps yet"
+              subtitle="Teeps (sale slips) are generated when you sell a buyer's lot from an arrived challan."
+              hint="चालान आने के बाद खरीदार को बेचने पर टीप बनती है।"
+              cta={{ label: "Go to Challan Entry", to: "/app/entry/challan" }}
+            />
+          </div>
+        ) : (
+          <div className="overflow-auto rounded border border-border bg-card">
+            <table className="grid-table">
+              <thead>
+                <tr><th>Date</th><th>Teep #</th><th>Buyer</th><th>Item</th><th>Quality</th><th className="num">Qty</th><th className="num">Rate</th><th className="num">Gross</th><th className="num">Expense</th><th className="num">Net</th></tr>
+              </thead>
+              <tbody>
+                {teeps.slice().reverse().map((t) => {
+                  const exp = t.expenses.reduce((a, b) => a + b.amount, 0);
+                  return (
+                    <tr key={t.id}>
+                      <td className="tabular">{t.date}</td>
+                      <td className="font-mono font-medium">{t.teepNo}</td>
+                      <td>{parties.find((p) => p.id === t.buyerId)?.name ?? "—"}</td>
+                      <td>{items.find((i) => i.id === t.itemId)?.name ?? "—"}</td>
+                      <td>{qualities.find((q) => q.id === t.qualityId)?.name ?? "—"}</td>
+                      <td className="num tabular">{fmtQty(t.qty)}</td>
+                      <td className="num tabular">{fmtINR(t.rate)}</td>
+                      <td className="num tabular">{fmtINR(t.gross)}</td>
+                      <td className="num tabular text-debit">{fmtINR(exp)}</td>
+                      <td className="num tabular font-semibold text-credit">{fmtINR(t.net)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
               <tfoot>
                 <tr className="bg-muted">
                   <td colSpan={5} className="text-right font-semibold">Totals</td>
@@ -94,9 +103,9 @@ function TeepPage() {
                   <td className="num tabular font-semibold text-credit">{fmtINR(totals.net)}</td>
                 </tr>
               </tfoot>
-            )}
-          </table>
-        </div>
+            </table>
+          </div>
+        )}
       </div>
     </>
   );
