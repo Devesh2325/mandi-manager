@@ -350,13 +350,10 @@ function hasCloudSession(): boolean {
 export async function seedIfEmpty() {
   const cloud = hasCloudSession();
 
-  const userCount = await db.users.count();
-  if (userCount === 0 && !cloud) {
-    await db.users.bulkAdd([
-      { username: "admin", password: "admin", name: "Administrator", role: "admin" },
-      { username: "munim", password: "munim", name: "Munim ji", role: "operator" },
-    ]);
-  }
+  // Legacy demo accounts have been removed. Cloud auth is the only
+  // sign-in path; never seed plaintext-password users into IndexedDB.
+  void cloud;
+
 
   const companyCount = await db.companies.count();
   if (companyCount === 0 && !cloud) {
