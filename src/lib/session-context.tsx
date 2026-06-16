@@ -37,13 +37,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("mandi:session", onChange);
   }, []);
 
-  const login = async (username: string, password: string) => {
-    const u = await db.users.where("username").equals(username).first();
-    if (!u || u.password !== password) return false;
-    const s: Session = { userId: u.id!, username: u.username, name: u.name, role: u.role };
-    setSession(s);
-    setSess(s);
-    return true;
+  // Legacy local sign-in removed. Cloud auth (Supabase) is the only login
+  // path; never compare or store plaintext passwords client-side.
+  const login = async (_username: string, _password: string) => {
+    return false;
   };
 
   const logout = () => {
