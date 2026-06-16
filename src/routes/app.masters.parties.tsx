@@ -4,7 +4,8 @@ import { useState } from "react";
 import { db, type Party, type PartyType } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { fmtINR } from "@/lib/format";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, Users } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/app/masters/parties")({
   component: PartiesPage,
