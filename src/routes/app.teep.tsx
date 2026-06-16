@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { useScope } from "@/lib/session-context";
 import { TopBar } from "@/components/TopBar";
 import { PdfActions } from "@/components/PdfActions";
+import { EmptyState } from "@/components/EmptyState";
+import { FileText } from "lucide-react";
 import { fmtINR, fmtQty } from "@/lib/format";
 
 export const Route = createFileRoute("/app/teep")({
