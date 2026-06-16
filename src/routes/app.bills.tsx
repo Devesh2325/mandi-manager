@@ -68,6 +68,19 @@ function BillsPage() {
           />
         }
       />
+      {buyerGroups.size === 0 && farmerGroups.size === 0 ? (
+        <div className="p-4">
+          <div className="rounded border border-dashed border-border bg-card">
+            <EmptyState
+              icon={FileText}
+              title="No bills yet"
+              subtitle="Buyer purcha and grower sale bills appear here automatically once you create teeps."
+              hint="टीप बनते ही खरीदार और किसान के बिल यहाँ दिखेंगे।"
+              cta={{ label: "Create a Challan", to: "/app/entry/challan" }}
+            />
+          </div>
+        </div>
+      ) : (
       <div className="grid gap-4 p-4 lg:grid-cols-2">
         {/* Suppress unused import warning */}
         <span className="hidden"><FileText /><Printer /></span>
