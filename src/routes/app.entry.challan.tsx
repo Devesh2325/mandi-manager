@@ -560,26 +560,35 @@ function ChallanEntryPage() {
                   </div>
                 </div>
 
-                {/* Section C: Sub Packing Matrix */}
-                <div className="border-b border-border p-2">
-                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">C · Sub Packing Matrix</div>
-                  <table className="grid-table">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
-                        <th className="num">Total Qty</th>
-                        <th className="num">Avg Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(() => {
-                        const entries = Object.values(row.matrix ?? {});
-                        const totalQty = entries.reduce((a, b) => a + (Number(b.qty) || 0), 0);
-                        const totalAmt = entries.reduce((a, b) => a + (Number(b.qty) || 0) * (Number(b.rate) || 0), 0);
-                        const avgRate = totalQty > 0 ? totalAmt / totalQty : 0;
-                        return (
-                          <>
+                {/* Section C: Sub Packing Matrix — collapsed by default; auto-opens when it has data */}
+                {sizes.length > 0 && (() => {
+                  const entries = Object.values(row.matrix ?? {});
+                  const hasMatrix = entries.some((c) => (c.qty || 0) > 0 || (c.rate || 0) > 0);
+                  const open = rowMatrixOpen[row.id] || hasMatrix;
+                  const totalQty = entries.reduce((a, b) => a + (Number(b.qty) || 0), 0);
+                  const totalAmt = entries.reduce((a, b) => a + (Number(b.qty) || 0) * (Number(b.rate) || 0), 0);
+                  const avgRate = totalQty > 0 ? totalAmt / totalQty : 0;
+                  return (
+                    <div className="border-b border-border p-2">
+                      <button
+                        type="button"
+                        onClick={() => setRowMatrixOpen((m) => ({ ...m, [row.id]: !open }))}
+                        className="mb-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                      >
+                        {open ? "▾ Hide" : "▸ Split qty/rate by size"}
+                        {hasMatrix && <span className="ml-1 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] normal-case text-primary">active</span>}
+                      </button>
+                      {open && (
+                        <table className="grid-table">
+                          <thead>
+                            <tr>
+                              <th></th>
+                              {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
+                              <th className="num">Total Qty</th>
+                              <th className="num">Avg Rate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
                             <tr>
                               <td className="font-medium">Qty</td>
                               {sizes.map((s) => (
@@ -622,12 +631,12 @@ function ChallanEntryPage() {
                               <td className="num tabular text-muted-foreground">{fmtINR(round2(totalAmt))}</td>
                               <td className="num text-muted-foreground">—</td>
                             </tr>
-                          </>
-                        );
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Inline buyer sale */}
                 <div className="p-2">
