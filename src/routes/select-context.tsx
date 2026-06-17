@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { db } from "@/lib/db";
 import { useAppSession } from "@/lib/session-context";
 import { useTenant } from "@/lib/tenant-context";
@@ -28,6 +28,27 @@ function SelectContextPage() {
     [companyId],
   ) ?? [];
   const [yearId, setYearId] = useState<number | null>(null);
+
+  // Auto-skip the picker when the user has exactly one company + one year
+  // (typical for a brand-new signup). Avoid forcing a redundant choice screen.
+  useEffect(() => {
+    if (companies.length !== 1) return;
+    const onlyCo = companies[0];
+    if (!onlyCo?.id) return;
+    let cancelled = false;
+    (async () => {
+      const ys = await db.financialYears.where("companyId").equals(onlyCo.id!).toArray();
+      if (cancelled) return;
+      if (ys.length === 1 && ys[0].id) {
+        await selectContext(onlyCo.id!, ys[0].id);
+        navigate({ to: "/app" });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companies.length]);
 
   const proceed = async () => {
     if (!companyId || !yearId) return;

@@ -52,9 +52,9 @@ function ChallanEntryPage() {
   const [halfPacks, setHalfPacks] = useState<number>(0);
   const [packMatrix, setPackMatrix] = useState<Record<string, { full: number; half: number }>>({});
   const [isCashSale, setIsCashSale] = useState(false);
-  const [qtyMatch, setQtyMatch] = useState(true);
-  const [useSaleRate, setUseSaleRate] = useState(false);
   const [notes, setNotes] = useState("");
+  // Per-sale opt-in size matrix (key = `${rowId}:${saleIdx}`).
+  const [matrixOpen, setMatrixOpen] = useState<Record<string, boolean>>({});
 
   const [rows, setRows] = useState<QualityRow[]>([
     { id: uid(), lotNo: "", qty: 0, sales: [], matrix: {} },
@@ -243,8 +243,6 @@ function ChallanEntryPage() {
         halfPacks: Number(halfPacks) || undefined,
         packMatrix: Object.keys(packMatrix).length ? packMatrix : undefined,
         isCashSale: isCashSale || undefined,
-        qtyMatch,
-        useSaleRate,
         qualities: rows,
         expenses,
         notes,
@@ -483,14 +481,9 @@ function ChallanEntryPage() {
                 <input type="checkbox" checked={isCashSale} onChange={(e) => setIsCashSale(e.target.checked)} className="h-3.5 w-3.5" />
                 <span className="font-semibold uppercase tracking-wider text-destructive">Cash Sale</span>
               </label>
-              <label className="inline-flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={qtyMatch} onChange={(e) => setQtyMatch(e.target.checked)} className="h-3.5 w-3.5" />
-                <span>Qty Match (auto-summed from rows)</span>
-              </label>
-              <label className="inline-flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={useSaleRate} onChange={(e) => setUseSaleRate(e.target.checked)} className="h-3.5 w-3.5" />
-                <span>Use Sale Rate (override matrix rates)</span>
-              </label>
+              <span className="text-muted-foreground">
+                Arrival qty auto-syncs with quality rows. Per-buyer rates set in each sale line.
+              </span>
               <span className="ml-auto text-[11px] text-muted-foreground">
                 Total Arrival Qty: <span className="tabular font-semibold text-foreground">{fmtQty(totals.qty)}</span>
               </span>
@@ -637,9 +630,11 @@ function ChallanEntryPage() {
                     const buyerExpLine = computeExpenses(expenseMasters, s.qty, grossLine, "buyer");
                     const buyerNet = round2(grossLine + buyerExpLine.reduce((a, b) => a + b.amount, 0));
                     const hasMatrix = Object.values(s.matrix ?? {}).some((c) => (c.qty || 0) > 0 || (c.rate || 0) > 0);
+                    const matrixKey = `${row.id}:${si}`;
+                    const showMatrix = matrixOpen[matrixKey] || hasMatrix;
                     return (
                       <div key={si} className="mb-2 rounded border border-border bg-background">
-                        {/* Buyer header line */}
+                        {/* Buyer header line — simple Qty/Rate (like grower row) */}
                         <div className="grid grid-cols-12 items-end gap-2 border-b border-border bg-muted/20 p-2">
                           <div className="col-span-4">
                             <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buyer</label>
@@ -652,11 +647,11 @@ function ChallanEntryPage() {
                           </div>
                           <div className="col-span-1">
                             <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Qty</label>
-                            <input type="number" disabled={hasMatrix} className="inp tabular text-right disabled:opacity-60" value={s.qty || ""} onChange={(e) => updateSale(row.id, si, { qty: Number(e.target.value) })} />
+                            <input type="number" disabled={hasMatrix} title={hasMatrix ? "Driven by size matrix below" : ""} className="inp tabular text-right disabled:opacity-60" value={s.qty || ""} onChange={(e) => updateSale(row.id, si, { qty: Number(e.target.value) })} />
                           </div>
                           <div className="col-span-1">
                             <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Rate</label>
-                            <input type="number" disabled={hasMatrix} className="inp tabular text-right disabled:opacity-60" value={s.rate || ""} onChange={(e) => updateSale(row.id, si, { rate: Number(e.target.value) })} />
+                            <input type="number" disabled={hasMatrix} title={hasMatrix ? "Driven by size matrix below" : ""} className="inp tabular text-right disabled:opacity-60" value={s.rate || ""} onChange={(e) => updateSale(row.id, si, { rate: Number(e.target.value) })} />
                           </div>
                           <div className="col-span-2 text-right">
                             <div className="text-[10px] uppercase text-muted-foreground">Gross</div>
@@ -671,53 +666,61 @@ function ChallanEntryPage() {
                           </div>
                         </div>
 
-                        {/* Per-buyer size matrix */}
-                        <div className="p-2">
-                          <div className="mb-1 flex items-center justify-between">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                              Buyer Size Matrix {hasMatrix && <span className="ml-1 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary">active — overrides Qty/Rate</span>}
+                        {/* Per-buyer size matrix — opt-in toggle (kept hidden by default so simple Qty/Rate just works) */}
+                        {sizes.length > 0 && (
+                          <div className="p-2">
+                            <div className="mb-1 flex items-center justify-between">
+                              <button
+                                type="button"
+                                onClick={() => setMatrixOpen((m) => ({ ...m, [matrixKey]: !showMatrix }))}
+                                className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                              >
+                                {showMatrix ? "▾ Hide" : "▸ Split by size"} {hasMatrix && <span className="ml-1 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary">active — overrides Qty/Rate</span>}
+                              </button>
                             </div>
+                            {showMatrix && (
+                              <table className="grid-table">
+                                <thead>
+                                  <tr>
+                                    <th></th>
+                                    {sizes.map((sz) => <th key={sz.id} className="num">{sz.name}</th>)}
+                                    <th className="num">Total</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr>
+                                    <td className="font-medium">Qty</td>
+                                    {sizes.map((sz) => (
+                                      <td key={sz.id} className="num">
+                                        <input
+                                          type="number"
+                                          className="grid-input text-right"
+                                          value={s.matrix?.[String(sz.id)]?.qty || ""}
+                                          onChange={(e) => updateSaleMatrix(row.id, si, String(sz.id), "qty", Number(e.target.value))}
+                                        />
+                                      </td>
+                                    ))}
+                                    <td className="num tabular font-semibold">{fmtQty(s.qty)}</td>
+                                  </tr>
+                                  <tr>
+                                    <td className="font-medium">Rate</td>
+                                    {sizes.map((sz) => (
+                                      <td key={sz.id} className="num">
+                                        <input
+                                          type="number"
+                                          className="grid-input text-right"
+                                          value={s.matrix?.[String(sz.id)]?.rate || ""}
+                                          onChange={(e) => updateSaleMatrix(row.id, si, String(sz.id), "rate", Number(e.target.value))}
+                                        />
+                                      </td>
+                                    ))}
+                                    <td className="num tabular font-semibold text-primary">{fmtINR(s.amount)}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            )}
                           </div>
-                          <table className="grid-table">
-                            <thead>
-                              <tr>
-                                <th></th>
-                                {sizes.map((sz) => <th key={sz.id} className="num">{sz.name}</th>)}
-                                <th className="num">Total</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <td className="font-medium">Qty</td>
-                                {sizes.map((sz) => (
-                                  <td key={sz.id} className="num">
-                                    <input
-                                      type="number"
-                                      className="grid-input text-right"
-                                      value={s.matrix?.[String(sz.id)]?.qty || ""}
-                                      onChange={(e) => updateSaleMatrix(row.id, si, String(sz.id), "qty", Number(e.target.value))}
-                                    />
-                                  </td>
-                                ))}
-                                <td className="num tabular font-semibold">{fmtQty(s.qty)}</td>
-                              </tr>
-                              <tr>
-                                <td className="font-medium">Rate</td>
-                                {sizes.map((sz) => (
-                                  <td key={sz.id} className="num">
-                                    <input
-                                      type="number"
-                                      className="grid-input text-right"
-                                      value={s.matrix?.[String(sz.id)]?.rate || ""}
-                                      onChange={(e) => updateSaleMatrix(row.id, si, String(sz.id), "rate", Number(e.target.value))}
-                                    />
-                                  </td>
-                                ))}
-                                <td className="num tabular font-semibold text-primary">{fmtINR(s.amount)}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
+                        )}
                       </div>
                     );
                   })}
