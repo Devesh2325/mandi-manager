@@ -395,7 +395,7 @@ function ChallanEntryPage() {
         {/* Main content */}
         <div className="flex-1 overflow-auto p-4">
           {/* Section A: Arrival */}
-          <Section title="A · Arrival / GR Details">
+          <Section title="Arrival Details">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
               <Field label="Challan #"><input value={challanNo} onChange={(e) => setChallanNo(e.target.value)} className="inp font-mono" /></Field>
               <Field label="Arrival Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
