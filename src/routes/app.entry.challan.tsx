@@ -243,8 +243,6 @@ function ChallanEntryPage() {
         halfPacks: Number(halfPacks) || undefined,
         packMatrix: Object.keys(packMatrix).length ? packMatrix : undefined,
         isCashSale: isCashSale || undefined,
-        qtyMatch,
-        useSaleRate,
         qualities: rows,
         expenses,
         notes,
