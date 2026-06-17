@@ -432,50 +432,61 @@ function ChallanEntryPage() {
               <Field label="Half Packs (total)"><input type="number" value={halfPacks || ""} onChange={(e) => setHalfPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
             </div>
 
-            {/* Per-size Full/Half breakdown */}
+            {/* Per-size Full/Half breakdown — collapsed by default */}
             {sizes.length > 0 && (
-              <div className="mt-3 rounded border border-border bg-muted/20 p-2">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Pack Breakdown by Size (optional)
-                </div>
-                <table className="grid-table">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
-                      <th className="num">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(["full", "half"] as const).map((kind) => {
-                      const total = sizes.reduce((a, s) => a + (Number(packMatrix[String(s.id)]?.[kind]) || 0), 0);
-                      return (
-                        <tr key={kind}>
-                          <td className="font-medium capitalize">{kind} Packs</td>
-                          {sizes.map((s) => {
-                            const key = String(s.id);
-                            return (
-                              <td key={s.id} className="num">
-                                <input
-                                  type="number"
-                                  className="grid-input text-right"
-                                  value={packMatrix[key]?.[kind] || ""}
-                                  onChange={(e) => {
-                                    setPackMatrix((m) => {
-                                      const cur = m[key] ?? { full: 0, half: 0 };
-                                      return { ...m, [key]: { ...cur, [kind]: Number(e.target.value) } };
-                                    });
-                                  }}
-                                />
-                              </td>
-                            );
-                          })}
-                          <td className="num tabular font-semibold">{total}</td>
+              <div className="mt-3 rounded border border-border bg-muted/20">
+                <button
+                  type="button"
+                  onClick={() => setPackBreakdownOpen((v) => !v)}
+                  className="flex w-full items-center justify-between p-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                >
+                  <span>{packBreakdownOpen ? "▾" : "▸"} Pack Breakdown by Size (optional)</span>
+                  {Object.keys(packMatrix).length > 0 && !packBreakdownOpen && (
+                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[9px] normal-case text-primary">has data</span>
+                  )}
+                </button>
+                {packBreakdownOpen && (
+                  <div className="border-t border-border p-2">
+                    <table className="grid-table">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
+                          <th className="num">Total</th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody>
+                        {(["full", "half"] as const).map((kind) => {
+                          const total = sizes.reduce((a, s) => a + (Number(packMatrix[String(s.id)]?.[kind]) || 0), 0);
+                          return (
+                            <tr key={kind}>
+                              <td className="font-medium capitalize">{kind} Packs</td>
+                              {sizes.map((s) => {
+                                const key = String(s.id);
+                                return (
+                                  <td key={s.id} className="num">
+                                    <input
+                                      type="number"
+                                      className="grid-input text-right"
+                                      value={packMatrix[key]?.[kind] || ""}
+                                      onChange={(e) => {
+                                        setPackMatrix((m) => {
+                                          const cur = m[key] ?? { full: 0, half: 0 };
+                                          return { ...m, [key]: { ...cur, [kind]: Number(e.target.value) } };
+                                        });
+                                      }}
+                                    />
+                                  </td>
+                                );
+                              })}
+                              <td className="num tabular font-semibold">{total}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
