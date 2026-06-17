@@ -55,6 +55,10 @@ function ChallanEntryPage() {
   const [notes, setNotes] = useState("");
   // Per-sale opt-in size matrix (key = `${rowId}:${saleIdx}`).
   const [matrixOpen, setMatrixOpen] = useState<Record<string, boolean>>({});
+  // Collapsible advanced sections (kept closed by default to reduce clutter)
+  const [packBreakdownOpen, setPackBreakdownOpen] = useState(false);
+  // Per-row sub-packing matrix open state (keyed by row id)
+  const [rowMatrixOpen, setRowMatrixOpen] = useState<Record<string, boolean>>({});
 
   const [rows, setRows] = useState<QualityRow[]>([
     { id: uid(), lotNo: "", qty: 0, sales: [], matrix: {} },
@@ -391,7 +395,7 @@ function ChallanEntryPage() {
         {/* Main content */}
         <div className="flex-1 overflow-auto p-4">
           {/* Section A: Arrival */}
-          <Section title="A · Arrival / GR Details">
+          <Section title="Arrival Details">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
               <Field label="Challan #"><input value={challanNo} onChange={(e) => setChallanNo(e.target.value)} className="inp font-mono" /></Field>
               <Field label="Arrival Date"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="inp" /></Field>
@@ -428,50 +432,61 @@ function ChallanEntryPage() {
               <Field label="Half Packs (total)"><input type="number" value={halfPacks || ""} onChange={(e) => setHalfPacks(Number(e.target.value))} className="inp tabular text-right" /></Field>
             </div>
 
-            {/* Per-size Full/Half breakdown */}
+            {/* Per-size Full/Half breakdown — collapsed by default */}
             {sizes.length > 0 && (
-              <div className="mt-3 rounded border border-border bg-muted/20 p-2">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Pack Breakdown by Size (optional)
-                </div>
-                <table className="grid-table">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
-                      <th className="num">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(["full", "half"] as const).map((kind) => {
-                      const total = sizes.reduce((a, s) => a + (Number(packMatrix[String(s.id)]?.[kind]) || 0), 0);
-                      return (
-                        <tr key={kind}>
-                          <td className="font-medium capitalize">{kind} Packs</td>
-                          {sizes.map((s) => {
-                            const key = String(s.id);
-                            return (
-                              <td key={s.id} className="num">
-                                <input
-                                  type="number"
-                                  className="grid-input text-right"
-                                  value={packMatrix[key]?.[kind] || ""}
-                                  onChange={(e) => {
-                                    setPackMatrix((m) => {
-                                      const cur = m[key] ?? { full: 0, half: 0 };
-                                      return { ...m, [key]: { ...cur, [kind]: Number(e.target.value) } };
-                                    });
-                                  }}
-                                />
-                              </td>
-                            );
-                          })}
-                          <td className="num tabular font-semibold">{total}</td>
+              <div className="mt-3 rounded border border-border bg-muted/20">
+                <button
+                  type="button"
+                  onClick={() => setPackBreakdownOpen((v) => !v)}
+                  className="flex w-full items-center justify-between p-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                >
+                  <span>{packBreakdownOpen ? "▾" : "▸"} Pack Breakdown by Size (optional)</span>
+                  {Object.keys(packMatrix).length > 0 && !packBreakdownOpen && (
+                    <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[9px] normal-case text-primary">has data</span>
+                  )}
+                </button>
+                {packBreakdownOpen && (
+                  <div className="border-t border-border p-2">
+                    <table className="grid-table">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
+                          <th className="num">Total</th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody>
+                        {(["full", "half"] as const).map((kind) => {
+                          const total = sizes.reduce((a, s) => a + (Number(packMatrix[String(s.id)]?.[kind]) || 0), 0);
+                          return (
+                            <tr key={kind}>
+                              <td className="font-medium capitalize">{kind} Packs</td>
+                              {sizes.map((s) => {
+                                const key = String(s.id);
+                                return (
+                                  <td key={s.id} className="num">
+                                    <input
+                                      type="number"
+                                      className="grid-input text-right"
+                                      value={packMatrix[key]?.[kind] || ""}
+                                      onChange={(e) => {
+                                        setPackMatrix((m) => {
+                                          const cur = m[key] ?? { full: 0, half: 0 };
+                                          return { ...m, [key]: { ...cur, [kind]: Number(e.target.value) } };
+                                        });
+                                      }}
+                                    />
+                                  </td>
+                                );
+                              })}
+                              <td className="num tabular font-semibold">{total}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 
@@ -492,7 +507,7 @@ function ChallanEntryPage() {
 
           {/* Section B + D: Multi quality with inline buyers */}
           <Section
-            title="B · Quality Rows  ·  D · Inline Buyer Sale"
+            title="Quality Rows & Buyer Sales"
             action={
               <div className="flex items-center gap-1.5">
                 <button
@@ -545,26 +560,35 @@ function ChallanEntryPage() {
                   </div>
                 </div>
 
-                {/* Section C: Sub Packing Matrix */}
-                <div className="border-b border-border p-2">
-                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">C · Sub Packing Matrix</div>
-                  <table className="grid-table">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
-                        <th className="num">Total Qty</th>
-                        <th className="num">Avg Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(() => {
-                        const entries = Object.values(row.matrix ?? {});
-                        const totalQty = entries.reduce((a, b) => a + (Number(b.qty) || 0), 0);
-                        const totalAmt = entries.reduce((a, b) => a + (Number(b.qty) || 0) * (Number(b.rate) || 0), 0);
-                        const avgRate = totalQty > 0 ? totalAmt / totalQty : 0;
-                        return (
-                          <>
+                {/* Section C: Sub Packing Matrix — collapsed by default; auto-opens when it has data */}
+                {sizes.length > 0 && (() => {
+                  const entries = Object.values(row.matrix ?? {});
+                  const hasMatrix = entries.some((c) => (c.qty || 0) > 0 || (c.rate || 0) > 0);
+                  const open = rowMatrixOpen[row.id] || hasMatrix;
+                  const totalQty = entries.reduce((a, b) => a + (Number(b.qty) || 0), 0);
+                  const totalAmt = entries.reduce((a, b) => a + (Number(b.qty) || 0) * (Number(b.rate) || 0), 0);
+                  const avgRate = totalQty > 0 ? totalAmt / totalQty : 0;
+                  return (
+                    <div className="border-b border-border p-2">
+                      <button
+                        type="button"
+                        onClick={() => setRowMatrixOpen((m) => ({ ...m, [row.id]: !open }))}
+                        className="mb-1 inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+                      >
+                        {open ? "▾ Hide" : "▸ Split qty/rate by size"}
+                        {hasMatrix && <span className="ml-1 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] normal-case text-primary">active</span>}
+                      </button>
+                      {open && (
+                        <table className="grid-table">
+                          <thead>
+                            <tr>
+                              <th></th>
+                              {sizes.map((s) => <th key={s.id} className="num">{s.name}</th>)}
+                              <th className="num">Total Qty</th>
+                              <th className="num">Avg Rate</th>
+                            </tr>
+                          </thead>
+                          <tbody>
                             <tr>
                               <td className="font-medium">Qty</td>
                               {sizes.map((s) => (
@@ -607,17 +631,17 @@ function ChallanEntryPage() {
                               <td className="num tabular text-muted-foreground">{fmtINR(round2(totalAmt))}</td>
                               <td className="num text-muted-foreground">—</td>
                             </tr>
-                          </>
-                        );
-                      })()}
-                    </tbody>
-                  </table>
-                </div>
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Inline buyer sale */}
                 <div className="p-2">
                   <div className="mb-1 flex items-center justify-between">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">D · Inline Sale (Buyers)</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buyers / Sale Lines</div>
                     <button onClick={() => addSale(row.id)} className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/20">
                       <Plus className="h-3 w-3" /> Add Buyer
                     </button>
