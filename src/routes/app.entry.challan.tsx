@@ -507,7 +507,7 @@ function ChallanEntryPage() {
 
           {/* Section B + D: Multi quality with inline buyers */}
           <Section
-            title="B · Quality Rows  ·  D · Inline Buyer Sale"
+            title="Quality Rows & Buyer Sales"
             action={
               <div className="flex items-center gap-1.5">
                 <button
