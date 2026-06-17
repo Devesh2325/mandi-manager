@@ -55,6 +55,10 @@ function ChallanEntryPage() {
   const [notes, setNotes] = useState("");
   // Per-sale opt-in size matrix (key = `${rowId}:${saleIdx}`).
   const [matrixOpen, setMatrixOpen] = useState<Record<string, boolean>>({});
+  // Collapsible advanced sections (kept closed by default to reduce clutter)
+  const [packBreakdownOpen, setPackBreakdownOpen] = useState(false);
+  // Per-row sub-packing matrix open state (keyed by row id)
+  const [rowMatrixOpen, setRowMatrixOpen] = useState<Record<string, boolean>>({});
 
   const [rows, setRows] = useState<QualityRow[]>([
     { id: uid(), lotNo: "", qty: 0, sales: [], matrix: {} },
