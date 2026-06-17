@@ -481,14 +481,9 @@ function ChallanEntryPage() {
                 <input type="checkbox" checked={isCashSale} onChange={(e) => setIsCashSale(e.target.checked)} className="h-3.5 w-3.5" />
                 <span className="font-semibold uppercase tracking-wider text-destructive">Cash Sale</span>
               </label>
-              <label className="inline-flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={qtyMatch} onChange={(e) => setQtyMatch(e.target.checked)} className="h-3.5 w-3.5" />
-                <span>Qty Match (auto-summed from rows)</span>
-              </label>
-              <label className="inline-flex cursor-pointer items-center gap-1.5">
-                <input type="checkbox" checked={useSaleRate} onChange={(e) => setUseSaleRate(e.target.checked)} className="h-3.5 w-3.5" />
-                <span>Use Sale Rate (override matrix rates)</span>
-              </label>
+              <span className="text-muted-foreground">
+                Arrival qty auto-syncs with quality rows. Per-buyer rates set in each sale line.
+              </span>
               <span className="ml-auto text-[11px] text-muted-foreground">
                 Total Arrival Qty: <span className="tabular font-semibold text-foreground">{fmtQty(totals.qty)}</span>
               </span>
