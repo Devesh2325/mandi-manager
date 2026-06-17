@@ -641,7 +641,7 @@ function ChallanEntryPage() {
                 {/* Inline buyer sale */}
                 <div className="p-2">
                   <div className="mb-1 flex items-center justify-between">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">D · Inline Sale (Buyers)</div>
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Buyers / Sale Lines</div>
                     <button onClick={() => addSale(row.id)} className="inline-flex items-center gap-1 rounded bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/20">
                       <Plus className="h-3 w-3" /> Add Buyer
                     </button>
