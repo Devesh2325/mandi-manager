@@ -52,9 +52,9 @@ function ChallanEntryPage() {
   const [halfPacks, setHalfPacks] = useState<number>(0);
   const [packMatrix, setPackMatrix] = useState<Record<string, { full: number; half: number }>>({});
   const [isCashSale, setIsCashSale] = useState(false);
-  const [qtyMatch, setQtyMatch] = useState(true);
-  const [useSaleRate, setUseSaleRate] = useState(false);
   const [notes, setNotes] = useState("");
+  // Per-sale opt-in size matrix (key = `${rowId}:${saleIdx}`).
+  const [matrixOpen, setMatrixOpen] = useState<Record<string, boolean>>({});
 
   const [rows, setRows] = useState<QualityRow[]>([
     { id: uid(), lotNo: "", qty: 0, sales: [], matrix: {} },
