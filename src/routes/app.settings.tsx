@@ -5,11 +5,10 @@ import { db, can, type AppRole } from "@/lib/db";
 import { useAppSession } from "@/lib/session-context";
 import { useTenant } from "@/lib/tenant-context";
 import { TopBar } from "@/components/TopBar";
-import { CloudSyncButton } from "@/components/CloudSync";
 import { buildBrandedPdf, downloadPdf } from "@/lib/pdf";
 import {
   Building2, Image as ImageIcon, Save, Upload, Trash2, Users, UserPlus,
-  Eye, FileText, ShieldCheck, ShieldAlert, Cloud, Download,
+  Eye, FileText, ShieldCheck, ShieldAlert, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
